@@ -2,42 +2,42 @@
 (function () {
   const menuContainer = document.querySelector(`.main__control`);
   const mainContainer = document.querySelector(`.main`);
+  const filterElements = [
+    {name: `All`, count: 13, isChecked: true},
+    {name: `Overdue`, count: 0},
+    {name: `Today`, count: 0},
+    {name: `Favorites`, count: 1},
+    {name: `Repeating`, count: 1},
+    {name: `Tags`, count: 1},
+    {name: `Archive`, count: 115},
+  ];
 
+  const menuElements = [
+    {name: `new-task`},
+    {name: `task`, isChecked: true},
+    {name: `statistic`},
+  ];
 
-  const getMenu = () => {
+  const getMenuMarkup = ({name, isChecked = false} = {}) => {
+    const id = name.toLowerCase();
+    const menuName = name.toUpperCase() + `S`;
     return `
-      <section class="control__btn-wrap">
       <input
         type="radio"
         name="control"
-        id="control__new-task"
+        id="control__${id}"
         class="control__input visually-hidden"
+        ${isChecked ? `checked` : ``}
       />
-      <label for="control__new-task" class="control__label control__label--new-task"
-        >+ ADD NEW TASK</label
-      >
-      <input
-        type="radio"
-        name="control"
-        id="control__task"
-        class="control__input visually-hidden"
-        checked
-      />
-      <label for="control__task" class="control__label">TASKS</label>
-      <input
-        type="radio"
-        name="control"
-        id="control__statistic"
-        class="control__input visually-hidden"
-      />
-      <label for="control__statistic" class="control__label"
-        >STATISTICS</label
-      >
-    </section>
-  `;
+      <label
+        for="control__${id}"
+        class="control__label ${id === `new-task` ? `control__label--new-task` : ``}">
+      ${id === `new-task` ? `+ ADD NEW TASK` : menuName}
+      </label>
+    `.trim();
   };
 
-  const getSearch = () => {
+  const getSearchMarkup = () => {
     return `
       <section class="main__search search container">
         <input
@@ -51,78 +51,46 @@
     `;
   };
 
-  const getFilter = () => {
+  const getFilterMarkup = ({name, count = 0, isChecked = false} = {}) => {
+    const id = name.toLowerCase();
     return `
-      <section class="main__filter filter container">
-        <input
-          type="radio"
-          id="filter__all"
-          class="filter__input visually-hidden"
-          name="filter"
-          checked
-        />
-        <label for="filter__all" class="filter__label">
-          All <span class="filter__all-count">13</span></label
-        >
-        <input
-          type="radio"
-          id="filter__overdue"
-          class="filter__input visually-hidden"
-          name="filter"
-          disabled
-        />
-        <label for="filter__overdue" class="filter__label"
-          >Overdue <span class="filter__overdue-count">0</span></label
-        >
-        <input
-          type="radio"
-          id="filter__today"
-          class="filter__input visually-hidden"
-          name="filter"
-          disabled
-        />
-        <label for="filter__today" class="filter__label"
-          >Today <span class="filter__today-count">0</span></label
-        >
-        <input
-          type="radio"
-          id="filter__favorites"
-          class="filter__input visually-hidden"
-          name="filter"
-        />
-        <label for="filter__favorites" class="filter__label"
-          >Favorites <span class="filter__favorites-count">1</span></label
-        >
-        <input
-          type="radio"
-          id="filter__repeating"
-          class="filter__input visually-hidden"
-          name="filter"
-        />
-        <label for="filter__repeating" class="filter__label"
-          >Repeating <span class="filter__repeating-count">1</span></label
-        >
-        <input
-          type="radio"
-          id="filter__tags"
-          class="filter__input visually-hidden"
-          name="filter"
-        />
-        <label for="filter__tags" class="filter__label"
-          >Tags <span class="filter__tags-count">1</span></label
-        >
-        <input
-          type="radio"
-          id="filter__archive"
-          class="filter__input visually-hidden"
-          name="filter"
-        />
-        <label for="filter__archive" class="filter__label"
-          >Archive <span class="filter__archive-count">115</span></label
-        >
-      </section>
-    `;
+      <input
+        type="radio"
+        id="filter__${id}"
+        class="filter__input visually-hidden"
+        name="filter"
+        ${isChecked ? `checked` : ``}
+        ${count === 0 ? `disabled` : ``}
+
+      />
+      <label for="filter__${id}" class="filter__label">
+        ${name.toUpperCase()}
+        <span class="filter__${id}-count">${count}</span>
+      </label>`.trim();
   };
+
+  const getMarkup = (dataList, generator) =>
+    dataList.map(generator).join(`\n`);
+
+  const getMarkupFilters = (data) =>
+    getMarkup(data, getFilterMarkup);
+
+  const filtersMarkup = getMarkupFilters(filterElements);
+
+  const filterWrapper = `
+  <section class="main__filter filter container">
+    ${filtersMarkup}
+  </section>`;
+
+  const getMarkupMenu = (data) =>
+    getMarkup(data, getMenuMarkup);
+
+  const menuMarkup = getMarkupMenu(menuElements);
+
+  const menuWrapper = `
+  <section class="control__btn-wrap">
+    ${menuMarkup}
+  </section>`;
 
   const getTaskCard = () => {
     return `
@@ -430,9 +398,9 @@
     container.insertAdjacentHTML(`beforeend`, component);
   };
 
-  renderComponent(menuContainer, getMenu());
-  renderComponent(mainContainer, getSearch());
-  renderComponent(mainContainer, getFilter());
+  renderComponent(menuContainer, menuWrapper);
+  renderComponent(mainContainer, getSearchMarkup());
+  renderComponent(mainContainer, filterWrapper);
   renderComponent(mainContainer, getEditForm());
 
   for (let i = 0; i < 3; i++) {
