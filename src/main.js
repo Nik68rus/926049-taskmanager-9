@@ -21,7 +21,7 @@
 
   const taskCard = {
     text: `Example default task with default color.`,
-    date: {day: `23 SEPTEMBER`, time: `11:15 PM`},
+    date: Date.now(),
     tags: [`todo`, `personal`, `important`],
   };
 
@@ -103,19 +103,30 @@
        <p class="card__text">${text}</p>
      </div>`;
   };
+  
+  const dateFormat = new Intl.DateTimeFormat(`en-GB`, {
+    month: `long`,
+    day: `numeric`,
+  });
 
-  const getDateMarkup = (date) => {
-    return `
-      <div class="card__dates">
-        <div class="card__date-deadline">
-          <p class="card__input-deadline-wrap">
-            <span class="card__date">${date.day}</span>
-            <span class="card__time">${date.time}</span>
-          </p>
-        </div>
+  const timeFormat = new Intl.DateTimeFormat(`en-GB`, {
+    hour12: true,
+    hour: `numeric`,
+    minute: `numeric`,
+  });
+  
+  const formatDate = (date) => dateFormat.format(date).toUpperCase();
+  const formatTime = (date) => timeFormat.format(date);
+
+  const getDateMarkup = (date) => `
+    <div class="card__dates">
+      <div class="card__date-deadline">
+        <p class="card__input-deadline-wrap">
+          <span class="card__date">${formatDate(date)}</span>
+          <span class="card__time">${formatTime(date)}</span>
+        </p>
       </div>
-    `;
-  };
+    </div>`;
 
   const getHashTagList = (tags) => {
     return getMarkup(tags, getHashTagMarkup);
