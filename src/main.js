@@ -98,11 +98,10 @@
     ${menuMarkup}
   </section>`;
 
-  const getTextArea = (text) => {
-    return `<div class="card__textarea-wrap">
-       <p class="card__text">${text}</p>
-     </div>`;
-  };
+  const getTextArea = (text) => `
+    <div class="card__textarea-wrap">
+      <p class="card__text">${text}</p>
+    </div>`.trim();
   
   const dateFormat = new Intl.DateTimeFormat(`en-GB`, {
     month: `long`,
@@ -128,19 +127,12 @@
       </div>
     </div>`;
 
-  const getHashTagList = (tags) => {
-    return getMarkup(tags, getHashTagMarkup);
-  };
+  const getHashTagList = (tags) => getMarkup(tags, getHashTagMarkup);
 
-  const getHashTagMarkup = (tag) => {
-    return `
-      <span class="card__hashtag-inner">
-        <span class="card__hashtag-name">
-          #${tag}
-        </span>
-      </span>
-    `;
-  };
+  const getHashTagMarkup = (tag) => `
+    <span class="card__hashtag-inner">
+      <span class="card__hashtag-name">#${tag}</span>
+    </span>`.trim();
 
   const getTaskCard = (card) => {
     const hashTagMarkup = `
