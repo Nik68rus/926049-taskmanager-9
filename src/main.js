@@ -2,6 +2,7 @@
 (function () {
   const menuContainer = document.querySelector(`.main__control`);
   const mainContainer = document.querySelector(`.main`);
+
   const filterElements = [
     {name: `All`, count: 13, isChecked: true},
     {name: `Overdue`, count: 0},
@@ -17,6 +18,13 @@
     {name: `task`, isChecked: true},
     {name: `statistic`},
   ];
+
+  const taskCard = {
+    text: `Example default task with default color.`,
+    date: {day: `23 SEPTEMBER`, time: `11:15 PM`},
+    tags: [`todo`, `personal`, `important`],
+  };
+
 
   const getMenuMarkup = ({name, isChecked = false} = {}) => {
     const id = name.toLowerCase();
@@ -60,8 +68,6 @@
         class="filter__input visually-hidden"
         name="filter"
         ${isChecked ? `checked` : ``}
-        ${count === 0 ? `disabled` : ``}
-
       />
       <label for="filter__${id}" class="filter__label">
         ${name.toUpperCase()}
@@ -92,7 +98,47 @@
     ${menuMarkup}
   </section>`;
 
-  const getTaskCard = () => {
+  const getTextArea = (text) => {
+    return `<div class="card__textarea-wrap">
+       <p class="card__text">${text}</p>
+     </div>`;
+  };
+
+  const getDateMarkup = (date) => {
+    return `
+      <div class="card__dates">
+        <div class="card__date-deadline">
+          <p class="card__input-deadline-wrap">
+            <span class="card__date">${date.day}</span>
+            <span class="card__time">${date.time}</span>
+          </p>
+        </div>
+      </div>
+    `;
+  };
+
+  const getHashTagList = (tags) => {
+    return getMarkup(tags, getHashTagMarkup);
+  };
+
+  const getHashTagMarkup = (tag) => {
+    return `
+      <span class="card__hashtag-inner">
+        <span class="card__hashtag-name">
+          #${tag}
+        </span>
+      </span>
+    `;
+  };
+
+  const getTaskCard = (card) => {
+    const hashTagMarkup = `
+      <div class="card__hashtag">
+        <div class="card__hashtag-list">
+          ${getHashTagList(card.tags)}
+        </div>
+      </div>
+    `;
     return `
       <article class="card card--black">
         <div class="card__form">
@@ -117,49 +163,17 @@
                 <use xlink:href="#wave"></use>
               </svg>
             </div>
-
-            <div class="card__textarea-wrap">
-              <p class="card__text">Example default task with default color.</p>
-            </div>
-
+            ${getTextArea(card.text)}
             <div class="card__settings">
               <div class="card__details">
-                <div class="card__dates">
-                  <div class="card__date-deadline">
-                    <p class="card__input-deadline-wrap">
-                      <span class="card__date">23 September</span>
-                      <span class="card__time">11:15 PM</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div class="card__hashtag">
-                  <div class="card__hashtag-list">
-                    <span class="card__hashtag-inner">
-                      <span class="card__hashtag-name">
-                        #todo
-                      </span>
-                    </span>
-
-                    <span class="card__hashtag-inner">
-                      <span class="card__hashtag-name">
-                        #personal
-                      </span>
-                    </span>
-
-                    <span class="card__hashtag-inner">
-                      <span class="card__hashtag-name">
-                        #important
-                      </span>
-                    </span>
-                  </div>
-                </div>
+                ${getDateMarkup(card.date)}
+                ${card.tags.length > 0 ? hashTagMarkup : ``}
               </div>
             </div>
           </div>
         </div>
       </article>
-    `;
+    `.trim();
   };
 
   const getEditForm = () => {
@@ -404,7 +418,7 @@
   renderComponent(mainContainer, getEditForm());
 
   for (let i = 0; i < 3; i++) {
-    renderComponent(mainContainer, getTaskCard());
+    renderComponent(mainContainer, getTaskCard(taskCard));
   }
   renderComponent(mainContainer, getLoadButton());
 })();
