@@ -1,4 +1,4 @@
-export const getEditForm = () => {
+export const getEditFormMarkup = () => {
   return `
     <article class="card card--edit card--black">
       <form class="card__form" method="get">

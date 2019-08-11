@@ -1,6 +1,6 @@
 import {getMarkup} from './util';
 
-const getMenuMarkup = ({name, isChecked = false} = {}) => {
+const getMenuItemMarkup = ({name, isChecked = false} = {}) => {
   const id = name.toLowerCase();
   const menuName = name.toUpperCase() + `S`;
   return `
@@ -19,18 +19,12 @@ const getMenuMarkup = ({name, isChecked = false} = {}) => {
   `.trim();
 };
 
-const menuElements = [
-  {name: `new-task`},
-  {name: `task`, isChecked: true},
-  {name: `statistic`},
-];
+const getMenuMarkup = (data) => getMarkup(data, getMenuItemMarkup);
 
-const getMarkupMenu = (data) => getMarkup(data, getMenuMarkup);
-
-const menuMarkup = getMarkupMenu(menuElements);
-
-export const menuWrapper = `
-<section class="control__btn-wrap">
-  ${menuMarkup}
-</section>`;
+export const getMenuWrappedMarkup = (elements) => {
+  return `
+    <section class="control__btn-wrap">
+      ${getMenuMarkup(elements)}
+    </section>`;
+};
 

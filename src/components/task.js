@@ -29,13 +29,13 @@ const getDateMarkup = (date) => `
     </div>
   </div>`;
 
-const getHashTagList = (tags) => getMarkup(tags, getHashTagMarkup);
-
 const getHashTagMarkup = (tag) => `
   <span class="card__hashtag-inner">
     <span class="card__hashtag-name">#${tag}</span>
   </span>
 `.trim();
+
+const getHashTagList = (tags) => getMarkup(tags, getHashTagMarkup);
 
 const wrapHashTagMarkup = (card) => {
   return `
@@ -46,7 +46,7 @@ const wrapHashTagMarkup = (card) => {
   </div>`;
 };
 
-export const getTaskCard = (card) => {
+export const getTaskCardMarkup = (task) => {
   return `
     <article class="card card--black">
       <div class="card__form">
@@ -71,11 +71,11 @@ export const getTaskCard = (card) => {
               <use xlink:href="#wave"></use>
             </svg>
           </div>
-          ${getTextArea(card.text)}
+          ${getTextArea(task.text)}
           <div class="card__settings">
             <div class="card__details">
-              ${getDateMarkup(card.date)}
-              ${card.tags.length > 0 ? wrapHashTagMarkup(card) : ``}
+              ${getDateMarkup(task.date)}
+              ${task.tags.length > 0 ? wrapHashTagMarkup(task) : ``}
             </div>
           </div>
         </div>
