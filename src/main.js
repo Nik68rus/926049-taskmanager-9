@@ -2,12 +2,23 @@ import {
   getMenuWrappedMarkup,
   getSearchMarkup,
   getFilterWrappedMarkup,
+  checkFilterOverdue,
+  checkFilterToday,
+  checkFilterFavorite,
+  checkFilterArchived,
+  checkFilterRepeating,
+  checkFilterTags,
   getEditFormMarkup,
   getBoardMarkup,
   getSortingMarkup,
   getLoadButtonMarkup,
   getTaskCardMarkup,
+  getTask,
 } from './components';
+
+const TASK_COUNT = 6;
+const taskList = new Array(TASK_COUNT).fill(``).map(getTask);
+console.log(taskList);
 
 const menuElements = [
   {name: `new-task`},
@@ -15,27 +26,28 @@ const menuElements = [
   {name: `statistic`},
 ];
 
-const filterElements = [
-  {name: `All`, count: 13, isChecked: true},
-  {name: `Overdue`, count: 0},
-  {name: `Today`, count: 0},
-  {name: `Favorites`, count: 1},
-  {name: `Repeating`, count: 1},
-  {name: `Tags`, count: 1},
-  {name: `Archive`, count: 115},
-];
+const getTaskCount = (tasks, cb) => tasks.filter(cb).length;
 
-const taskCard = {
-  text: `Example default task with default color.`,
-  date: Date.now(),
-  tags: [`todo`, `personal`, `important`],
-};
+
+const filterElements = [
+  {title: `All`, count: taskList.length, isChecked: true},
+  {title: `Overdue`, count: getTaskCount(taskList, checkFilterOverdue)},
+  {title: `Today`, count: getTaskCount(taskList, checkFilterToday)},
+  {title: `Favorites`, count: getTaskCount(taskList, checkFilterFavorite)},
+  {title: `Repeating`, count: getTaskCount(taskList, checkFilterRepeating)},
+  {title: `Tags`, count: getTaskCount(taskList, checkFilterTags)},
+  {title: `Archive`, count: getTaskCount(taskList, checkFilterArchived)},
+];
 
 const menuContainer = document.querySelector(`.main__control`);
 const mainContainer = document.querySelector(`.main`);
 
 const renderComponent = (container, component, position) => {
   container.insertAdjacentHTML(position, component);
+};
+
+const renderTasks = (container, tasks) => {
+  container.insertAdjacentHTML(`beforeend`, tasks.map(getTaskCardMarkup).join(``));
 };
 
 renderComponent(menuContainer, getMenuWrappedMarkup(menuElements), `beforeend`);
@@ -47,10 +59,8 @@ const taskBoard = document.querySelector(`.board__tasks`);
 const boardContainer = document.querySelector(`.board`);
 
 renderComponent(boardContainer, getSortingMarkup(), `afterbegin`);
-renderComponent(taskBoard, getEditFormMarkup(), `beforeend`);
+renderComponent(taskBoard, getEditFormMarkup(taskList[0]), `beforeend`);
 
-for (let i = 0; i < 3; i++) {
-  renderComponent(taskBoard, getTaskCardMarkup(taskCard), `beforeend`);
-}
+renderTasks(taskBoard, taskList);
 
 renderComponent(taskBoard, getLoadButtonMarkup(), `beforeend`);

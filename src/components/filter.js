@@ -1,7 +1,8 @@
 import {getMarkup} from './util';
+import {formatDate} from './util';
 
-const getFilterItemMarkup = ({name, count = 0, isChecked = false} = {}) => {
-  const id = name.toLowerCase();
+const getFilterItemMarkup = ({title, count = 0, isChecked = false} = {}) => {
+  const id = title.toLowerCase();
   return `
     <input
       type="radio"
@@ -11,7 +12,7 @@ const getFilterItemMarkup = ({name, count = 0, isChecked = false} = {}) => {
       ${isChecked ? `checked` : ``}
     />
     <label for="filter__${id}" class="filter__label">
-      ${name.toUpperCase()}
+      ${title.toUpperCase()}
       <span class="filter__${id}-count">${count}</span>
     </label>`.trim();
 };
@@ -25,3 +26,10 @@ export const getFilterWrappedMarkup = (elements) => {
       ${getFiltersMarkup(elements)}
     </section>`;
 };
+
+export const checkFilterOverdue = (task) => task.dueDate < Date.now();
+export const checkFilterToday = (task) => formatDate(task.dueDate) === formatDate(Date.now());
+export const checkFilterFavorite = (task) => task.isFavorite === true;
+export const checkFilterRepeating = (task) => Object.keys(task.repeatingDays).some((day) => task.repeatingDays[day]);
+export const checkFilterTags = (task) => task.tags.size > 0;
+export const checkFilterArchived = (task) => task.isArchive === true;

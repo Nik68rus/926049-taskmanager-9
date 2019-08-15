@@ -1,23 +1,9 @@
-import {getMarkup} from './util';
+import {formatDate, formatTime} from './util';
 
 const getTextArea = (text) => `
   <div class="card__textarea-wrap">
     <p class="card__text">${text}</p>
   </div>`.trim();
-
-const dateFormat = new Intl.DateTimeFormat(`en-GB`, {
-  month: `long`,
-  day: `numeric`,
-});
-
-const timeFormat = new Intl.DateTimeFormat(`en-GB`, {
-  hour12: true,
-  hour: `numeric`,
-  minute: `numeric`,
-});
-
-const formatDate = (date) => dateFormat.format(date).toUpperCase();
-const formatTime = (date) => timeFormat.format(date);
 
 const getDateMarkup = (date) => `
   <div class="card__dates">
@@ -29,26 +15,32 @@ const getDateMarkup = (date) => `
     </div>
   </div>`;
 
-const getHashTagMarkup = (tag) => `
-  <span class="card__hashtag-inner">
-    <span class="card__hashtag-name">#${tag}</span>
-  </span>
-`.trim();
+const getHashTagList = (tags) => `
+  ${Array.from(tags).map((tag) => `
+    <span class="card__hashtag-inner">
+      <span class="card__hashtag-name">
+        #${tag}
+      </span>
+    </span>
+  `).join(``)}
+`;
 
-const getHashTagList = (tags) => getMarkup(tags, getHashTagMarkup);
-
-const wrapHashTagMarkup = (card) => {
+const wrapHashTagMarkup = (tags) => {
   return `
   <div class="card__hashtag">
     <div class="card__hashtag-list">
-      ${getHashTagList(card.tags)}
+      ${getHashTagList(tags)}
     </div>
   </div>`;
 };
 
-export const getTaskCardMarkup = (task) => {
+export const checkDeadline = (date) => Date.now() < date ? `` : `card--deadline`;
+
+export const checkRepeat = (days) => Object.keys(days).some((day) => days[day]) ? `card--repeat` : ``;
+
+export const getTaskCardMarkup = ({description, dueDate, repeatingDays, tags, color}) => {
   return `
-    <article class="card card--black">
+    <article class="card card--${color} ${checkRepeat(repeatingDays)} ${checkDeadline(dueDate)}">
       <div class="card__form">
         <div class="card__inner">
           <div class="card__control">
@@ -71,11 +63,11 @@ export const getTaskCardMarkup = (task) => {
               <use xlink:href="#wave"></use>
             </svg>
           </div>
-          ${getTextArea(task.text)}
+          ${getTextArea(description)}
           <div class="card__settings">
             <div class="card__details">
-              ${getDateMarkup(task.date)}
-              ${task.tags.length > 0 ? wrapHashTagMarkup(task) : ``}
+              ${getDateMarkup(dueDate)}
+              ${wrapHashTagMarkup(tags)}
             </div>
           </div>
         </div>
