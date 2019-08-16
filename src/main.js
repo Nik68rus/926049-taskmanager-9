@@ -13,13 +13,11 @@ import {
   getSortingMarkup,
   getLoadButtonMarkup,
   getTaskCardMarkup,
-  getTask,
+  taskList,
+  TASK_BOARD_SIZE
 } from './components';
 
-const TASK_COUNT = 6;
-const taskList = new Array(TASK_COUNT).fill(``).map(getTask);
-console.log(taskList);
-
+let displayedTasks = taskList.slice(0, TASK_BOARD_SIZE);
 const menuElements = [
   {name: `new-task`},
   {name: `task`, isChecked: true},
@@ -59,8 +57,19 @@ const taskBoard = document.querySelector(`.board__tasks`);
 const boardContainer = document.querySelector(`.board`);
 
 renderComponent(boardContainer, getSortingMarkup(), `afterbegin`);
-renderComponent(taskBoard, getEditFormMarkup(taskList[0]), `beforeend`);
+renderComponent(taskBoard, getEditFormMarkup(displayedTasks[0]), `beforeend`);
+renderTasks(taskBoard, displayedTasks.filter((task, i) => i !== 0));
+renderComponent(boardContainer, getLoadButtonMarkup(), `beforeend`);
 
-renderTasks(taskBoard, taskList);
+const loadMoreButton = document.querySelector(`.load-more`);
 
-renderComponent(taskBoard, getLoadButtonMarkup(), `beforeend`);
+const onLoadMoreButtonClick = () => {
+  const renderingTasks = taskList.slice(displayedTasks.length, displayedTasks.length + TASK_BOARD_SIZE);
+  renderTasks(taskBoard, renderingTasks, `beforeend`);
+  displayedTasks = displayedTasks.concat(renderingTasks);
+  if (renderingTasks.length < TASK_BOARD_SIZE) {
+    loadMoreButton.style.display = `none`;
+  }
+};
+
+loadMoreButton.addEventListener(`click`, onLoadMoreButtonClick);

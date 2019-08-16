@@ -1,6 +1,6 @@
-const tagList = [`homework`, `theory`, `practice`, `intensive`, `keks`];
+import {TAG_LIST, COLORS, TASK_COUNT} from './constants';
 
-export const getTask = () => ({
+const getTask = () => ({
   description: [
     `Изучить теорию`,
     `Сделать домашку`,
@@ -16,17 +16,14 @@ export const getTask = () => ({
     'su': false,
   },
   tags: new Set([
-    tagList[Math.floor(Math.random() * 5)],
-    tagList[Math.floor(Math.random() * 5)],
-    tagList[Math.floor(Math.random() * 5)],
+    TAG_LIST[Math.floor(Math.random() * 5)],
+    TAG_LIST[Math.floor(Math.random() * 5)],
+    TAG_LIST[Math.floor(Math.random() * 5)],
   ]),
-  color: [
-    `black`,
-    `yellow`,
-    `blue`,
-    `green`,
-    `pink`,
-  ][Math.floor(Math.random() * 5)],
+  color: COLORS[Math.floor(Math.random() * 5)],
   isFavorite: Boolean(Math.round(Math.random())),
   isArchive: Boolean(Math.round(Math.random())),
 });
+
+export const taskList = new Array(TASK_COUNT).fill(``).map(getTask);
+

@@ -6,7 +6,8 @@ import {getBoardMarkup} from './board';
 import {getSortingMarkup} from './sorting';
 import {getLoadButtonMarkup} from './load-button';
 import {getTaskCardMarkup} from './task';
-import {getTask} from './data';
+import {taskList} from './data';
+import {COLORS, TAG_LIST, TASK_BOARD_SIZE, TASK_COUNT} from './constants';
 
 export {
   getMenuWrappedMarkup,
@@ -23,5 +24,9 @@ export {
   getSortingMarkup,
   getLoadButtonMarkup,
   getTaskCardMarkup,
-  getTask,
+  taskList,
+  COLORS,
+  TAG_LIST,
+  TASK_BOARD_SIZE,
+  TASK_COUNT,
 };
