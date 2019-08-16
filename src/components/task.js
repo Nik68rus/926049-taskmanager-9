@@ -38,7 +38,7 @@ export const checkDeadline = (date) => Date.now() < date ? `` : `card--deadline`
 
 export const checkRepeat = (days) => Object.keys(days).some((day) => days[day]) ? `card--repeat` : ``;
 
-export const getTaskCardMarkup = ({description, dueDate, repeatingDays, tags, color}) => {
+export const getTaskCardMarkup = ({description, dueDate, repeatingDays, tags, color, isFavorite, isArchive}) => {
   return `
     <article class="card card--${color} ${checkRepeat(repeatingDays)} ${checkDeadline(dueDate)}">
       <div class="card__form">
@@ -47,12 +47,13 @@ export const getTaskCardMarkup = ({description, dueDate, repeatingDays, tags, co
             <button type="button" class="card__btn card__btn--edit">
               edit
             </button>
-            <button type="button" class="card__btn card__btn--archive">
+            <button type="button"
+            class="card__btn card__btn--archive ${isArchive ? `card__btn--disabled` : ``}">
               archive
             </button>
             <button
               type="button"
-              class="card__btn card__btn--favorites card__btn--disabled"
+              class="card__btn card__btn--favorites ${isFavorite ? `card__btn--disabled` : ``}"
             >
               favorites
             </button>

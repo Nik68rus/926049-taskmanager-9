@@ -51,18 +51,18 @@ const getColorsMarkup = (data, curentTaskColor) => data.map((clr) => `
   >
 `).join(`\n`);
 
-export const getEditFormMarkup = ({description, dueDate, repeatingDays, tags, color}) => {
+export const getEditFormMarkup = ({description, dueDate, repeatingDays, tags, color, isArchive, isFavorite}) => {
   return `
   <article class="card card--edit card--${color} ${checkRepeat(repeatingDays)} ${checkDeadline(dueDate)}">
     <form class="card__form" method="get">
       <div class="card__inner">
         <div class="card__control">
-          <button type="button" class="card__btn card__btn--archive">
+          <button type="button" class="card__btn card__btn--archive ${isArchive ? `card__btn--disabled` : ``}">
             archive
           </button>
           <button
             type="button"
-            class="card__btn card__btn--favorites card__btn--disabled"
+            class="card__btn card__btn--favorites ${isFavorite ? `card__btn--disabled` : ``}"
           >
             favorites
           </button>
