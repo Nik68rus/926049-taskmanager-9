@@ -1,7 +1,7 @@
 import {makeMarkupGenerator} from '../util/dom';
 import {checkDeadline, checkRepeat} from './task';
 import {formatDate, formatTime} from './card-date';
-import {COLORS} from '../constants';
+import {COLORS} from '../mock';
 
 const getRepeatDayMarkup = (days) => Object.keys(days).map((day) => `
   <input

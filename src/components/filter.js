@@ -42,8 +42,8 @@ const checkFilterTags = (task) =>
 const checkFilterArchived = (task) =>
   task.isArchive === true;
 
-const getTaskCount = (data, cb) =>
-  data.filter(cb).length;
+const getTaskCount = (tasks, cb) =>
+  tasks.filter(cb).length;
 
 export const getFilterElements = (tasks) => [
   {title: `All`, count: tasks.length, isChecked: true},

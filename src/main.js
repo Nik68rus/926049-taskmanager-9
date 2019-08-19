@@ -11,8 +11,7 @@ import {
   getTasksMarkup,
 } from './components';
 
-import {TASK_LOAD_NUMB} from './constants';
-import {Mock} from './mock';
+import {Mock, TASK_LOAD_NUMB} from './mock';
 
 const tasks = Mock.load();
 
