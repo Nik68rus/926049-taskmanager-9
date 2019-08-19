@@ -2,12 +2,20 @@ import {
   getMenuWrappedMarkup,
   getSearchMarkup,
   getFilterWrappedMarkup,
+  updateFilters,
+  getFilterElements,
   getEditFormMarkup,
   getBoardMarkup,
   getSortingMarkup,
   getLoadButtonMarkup,
-  getTaskCardMarkup,
+  getTasksMarkup,
 } from './components';
+
+import {Mock, TASK_LOAD_NUMB} from './mock';
+
+const tasks = Mock.load();
+
+let loadedTasks = tasks.slice(0, TASK_LOAD_NUMB);
 
 const menuElements = [
   {name: `new-task`},
@@ -15,42 +23,37 @@ const menuElements = [
   {name: `statistic`},
 ];
 
-const filterElements = [
-  {name: `All`, count: 13, isChecked: true},
-  {name: `Overdue`, count: 0},
-  {name: `Today`, count: 0},
-  {name: `Favorites`, count: 1},
-  {name: `Repeating`, count: 1},
-  {name: `Tags`, count: 1},
-  {name: `Archive`, count: 115},
-];
-
-const taskCard = {
-  text: `Example default task with default color.`,
-  date: Date.now(),
-  tags: [`todo`, `personal`, `important`],
-};
-
 const menuContainer = document.querySelector(`.main__control`);
 const mainContainer = document.querySelector(`.main`);
 
-const renderComponent = (container, component, position) => {
+const renderComponent = (container, component, position = `beforeend`) => {
   container.insertAdjacentHTML(position, component);
 };
 
-renderComponent(menuContainer, getMenuWrappedMarkup(menuElements), `beforeend`);
+renderComponent(menuContainer, getMenuWrappedMarkup(menuElements));
 renderComponent(mainContainer, getSearchMarkup(), `beforeend`);
-renderComponent(mainContainer, getFilterWrappedMarkup(filterElements), `beforeend`);
-renderComponent(mainContainer, getBoardMarkup(), `beforeend`);
+renderComponent(mainContainer, getFilterWrappedMarkup(getFilterElements(loadedTasks)));
+renderComponent(mainContainer, getBoardMarkup());
 
 const taskBoard = document.querySelector(`.board__tasks`);
 const boardContainer = document.querySelector(`.board`);
 
 renderComponent(boardContainer, getSortingMarkup(), `afterbegin`);
-renderComponent(taskBoard, getEditFormMarkup(), `beforeend`);
+renderComponent(taskBoard, getEditFormMarkup(loadedTasks[0]));
+renderComponent(taskBoard, getTasksMarkup(loadedTasks.slice(1, loadedTasks.length)));
+renderComponent(boardContainer, getLoadButtonMarkup());
 
-for (let i = 0; i < 3; i++) {
-  renderComponent(taskBoard, getTaskCardMarkup(taskCard), `beforeend`);
-}
+const loadMoreButton = document.querySelector(`.load-more`);
 
-renderComponent(taskBoard, getLoadButtonMarkup(), `beforeend`);
+const onLoadMoreButtonClick = () => {
+  const renderingTasks = tasks.slice(loadedTasks.length, loadedTasks.length + TASK_LOAD_NUMB);
+  renderComponent(taskBoard, getTasksMarkup(renderingTasks));
+  loadedTasks = loadedTasks.concat(renderingTasks);
+  if (renderingTasks.length < TASK_LOAD_NUMB) {
+    loadMoreButton.style.display = `none`;
+    loadMoreButton.removeEventListener(`click`, onLoadMoreButtonClick);
+  }
+  updateFilters(getFilterElements(loadedTasks));
+};
+
+loadMoreButton.addEventListener(`click`, onLoadMoreButtonClick);

@@ -1,19 +1,21 @@
 import {getMenuWrappedMarkup} from './site-menu';
 import {getSearchMarkup} from './search';
-import {getFilterWrappedMarkup} from './filter';
+import {getFilterWrappedMarkup, updateFilters, getFilterElements} from './filter';
 import {getEditFormMarkup} from './edit-form';
 import {getBoardMarkup} from './board';
 import {getSortingMarkup} from './sorting';
 import {getLoadButtonMarkup} from './load-button';
-import {getTaskCardMarkup} from './task';
+import {getTasksMarkup} from './task';
 
 export {
   getMenuWrappedMarkup,
   getSearchMarkup,
   getFilterWrappedMarkup,
+  updateFilters,
+  getFilterElements,
   getEditFormMarkup,
   getBoardMarkup,
   getSortingMarkup,
   getLoadButtonMarkup,
-  getTaskCardMarkup,
+  getTasksMarkup,
 };
