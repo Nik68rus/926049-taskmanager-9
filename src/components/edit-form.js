@@ -1,6 +1,7 @@
+import {makeMarkupGenerator} from '../util/dom';
 import {checkDeadline, checkRepeat} from './task';
-import {formatDate, formatTime} from './util';
-import {COLORS} from './constants';
+import {formatDate, formatTime} from './card-date';
+import {COLORS} from '../constants';
 
 const getRepeatDayMarkup = (days) => Object.keys(days).map((day) => `
   <input
@@ -17,22 +18,24 @@ const getRepeatDayMarkup = (days) => Object.keys(days).map((day) => `
   >${day}</label>
 `).join(`\n`);
 
-const getHashtagMarkup = (data) => [...data].map((tag) => `
-  <span class="card__hashtag-inner">
-    <input
-      type="hidden"
-      name="hashtag"
-      value="repeat"
-      class="card__hashtag-hidden-input"
-    />
-    <p class="card__hashtag-name">
-      #${tag}
-    </p>
-    <button type="button" class="card__hashtag-delete">
-      delete
-    </button>
-  </span>
-`).join(`\n`);
+const getHashtagMarkup = (tag) => `
+<span class="card__hashtag-inner">
+  <input
+    type="hidden"
+    name="hashtag"
+    value="repeat"
+    class="card__hashtag-hidden-input"
+  />
+  <p class="card__hashtag-name">
+    #${tag}
+  </p>
+  <button type="button" class="card__hashtag-delete">
+    delete
+  </button>
+</span>
+`;
+
+const getHashtagsMarkup = makeMarkupGenerator(getHashtagMarkup, `\n`);
 
 const getColorsMarkup = (data, curentTaskColor) => data.map((clr) => `
   <input
@@ -42,7 +45,6 @@ const getColorsMarkup = (data, curentTaskColor) => data.map((clr) => `
     name="color"
     value="${clr}"
     ${clr === curentTaskColor ? `checked` : ``}
-
   />
   <label
     for="color-${clr}-4"
@@ -116,7 +118,7 @@ export const getEditFormMarkup = ({description, dueDate, repeatingDays, tags, co
 
             <div class="card__hashtag">
               <div class="card__hashtag-list">
-                ${getHashtagMarkup(tags)}
+                ${getHashtagsMarkup(tags)}
               </div>
 
               <label>

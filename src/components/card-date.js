@@ -1,5 +1,3 @@
-export const getMarkup = (dataList, generator) => dataList.map(generator).join(`\n`);
-
 const dateFormat = new Intl.DateTimeFormat(`en-GB`, {
   month: `long`,
   day: `numeric`,

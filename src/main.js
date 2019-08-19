@@ -2,74 +2,59 @@ import {
   getMenuWrappedMarkup,
   getSearchMarkup,
   getFilterWrappedMarkup,
-  checkFilterOverdue,
-  checkFilterToday,
-  checkFilterFavorite,
-  checkFilterArchived,
-  checkFilterRepeating,
-  checkFilterTags,
+  updateFilters,
+  getFilterElements,
   getEditFormMarkup,
   getBoardMarkup,
   getSortingMarkup,
   getLoadButtonMarkup,
-  getTaskCardMarkup,
-  taskList,
-  TASK_BOARD_SIZE
+  getTasksMarkup,
 } from './components';
 
-let displayedTasks = taskList.slice(0, TASK_BOARD_SIZE);
+import {TASK_LOAD_NUMB} from './constants';
+import {Mock} from './mock';
+
+const tasks = Mock.load();
+
+let loadedTasks = tasks.slice(0, TASK_LOAD_NUMB);
+
 const menuElements = [
   {name: `new-task`},
   {name: `task`, isChecked: true},
   {name: `statistic`},
 ];
 
-const getTaskCount = (tasks, cb) => tasks.filter(cb).length;
-
-
-const filterElements = [
-  {title: `All`, count: taskList.length, isChecked: true},
-  {title: `Overdue`, count: getTaskCount(taskList, checkFilterOverdue)},
-  {title: `Today`, count: getTaskCount(taskList, checkFilterToday)},
-  {title: `Favorites`, count: getTaskCount(taskList, checkFilterFavorite)},
-  {title: `Repeating`, count: getTaskCount(taskList, checkFilterRepeating)},
-  {title: `Tags`, count: getTaskCount(taskList, checkFilterTags)},
-  {title: `Archive`, count: getTaskCount(taskList, checkFilterArchived)},
-];
-
 const menuContainer = document.querySelector(`.main__control`);
 const mainContainer = document.querySelector(`.main`);
 
-const renderComponent = (container, component, position) => {
+const renderComponent = (container, component, position = `beforeend`) => {
   container.insertAdjacentHTML(position, component);
 };
 
-const renderTasks = (container, tasks) => {
-  container.insertAdjacentHTML(`beforeend`, tasks.map(getTaskCardMarkup).join(``));
-};
-
-renderComponent(menuContainer, getMenuWrappedMarkup(menuElements), `beforeend`);
+renderComponent(menuContainer, getMenuWrappedMarkup(menuElements));
 renderComponent(mainContainer, getSearchMarkup(), `beforeend`);
-renderComponent(mainContainer, getFilterWrappedMarkup(filterElements), `beforeend`);
-renderComponent(mainContainer, getBoardMarkup(), `beforeend`);
+renderComponent(mainContainer, getFilterWrappedMarkup(getFilterElements(loadedTasks)));
+renderComponent(mainContainer, getBoardMarkup());
 
 const taskBoard = document.querySelector(`.board__tasks`);
 const boardContainer = document.querySelector(`.board`);
 
 renderComponent(boardContainer, getSortingMarkup(), `afterbegin`);
-renderComponent(taskBoard, getEditFormMarkup(displayedTasks[0]), `beforeend`);
-renderTasks(taskBoard, displayedTasks.filter((task, i) => i !== 0));
-renderComponent(boardContainer, getLoadButtonMarkup(), `beforeend`);
+renderComponent(taskBoard, getEditFormMarkup(loadedTasks[0]));
+renderComponent(taskBoard, getTasksMarkup(loadedTasks.slice(1, loadedTasks.length)));
+renderComponent(boardContainer, getLoadButtonMarkup());
 
 const loadMoreButton = document.querySelector(`.load-more`);
 
 const onLoadMoreButtonClick = () => {
-  const renderingTasks = taskList.slice(displayedTasks.length, displayedTasks.length + TASK_BOARD_SIZE);
-  renderTasks(taskBoard, renderingTasks, `beforeend`);
-  displayedTasks = displayedTasks.concat(renderingTasks);
-  if (renderingTasks.length < TASK_BOARD_SIZE) {
+  const renderingTasks = tasks.slice(loadedTasks.length, loadedTasks.length + TASK_LOAD_NUMB);
+  renderComponent(taskBoard, getTasksMarkup(renderingTasks));
+  loadedTasks = loadedTasks.concat(renderingTasks);
+  if (renderingTasks.length < TASK_LOAD_NUMB) {
     loadMoreButton.style.display = `none`;
+    loadMoreButton.removeEventListener(`click`, onLoadMoreButtonClick);
   }
+  updateFilters(getFilterElements(loadedTasks));
 };
 
 loadMoreButton.addEventListener(`click`, onLoadMoreButtonClick);

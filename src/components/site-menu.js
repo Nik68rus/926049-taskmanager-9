@@ -1,6 +1,6 @@
-import {getMarkup} from './util';
+import {makeMarkupGenerator} from '../util/dom';
 
-const getMenuItemMarkup = ({name, isChecked = false} = {}) => {
+const getMenuItemMarkup = ({name, isChecked = false}) => {
   const id = name.toLowerCase();
   const menuName = name.toUpperCase() + `S`;
   return `
@@ -19,12 +19,10 @@ const getMenuItemMarkup = ({name, isChecked = false} = {}) => {
   `.trim();
 };
 
-const getMenuMarkup = (data) => getMarkup(data, getMenuItemMarkup);
+const getMenuMarkup = makeMarkupGenerator(getMenuItemMarkup, `\n`);
 
-export const getMenuWrappedMarkup = (elements) => {
-  return `
-    <section class="control__btn-wrap">
-      ${getMenuMarkup(elements)}
-    </section>`;
-};
+export const getMenuWrappedMarkup = (elements) => `
+  <section class="control__btn-wrap">
+    ${getMenuMarkup(elements)}
+  </section>`;
 

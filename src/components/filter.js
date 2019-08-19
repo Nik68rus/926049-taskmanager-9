@@ -1,7 +1,7 @@
-import {getMarkup} from './util';
-import {formatDate} from './util';
+import {makeMarkupGenerator} from '../util/dom';
+import {formatDate} from './card-date';
 
-const getFilterItemMarkup = ({title, count = 0, isChecked = false} = {}) => {
+const getFilterItemMarkup = ({title, count = 0, isChecked = false}) => {
   const id = title.toLowerCase();
   return `
     <input
@@ -17,19 +17,47 @@ const getFilterItemMarkup = ({title, count = 0, isChecked = false} = {}) => {
     </label>`.trim();
 };
 
-const getFiltersMarkup = (data) =>
-  getMarkup(data, getFilterItemMarkup);
+const getFiltersMarkup = makeMarkupGenerator(getFilterItemMarkup, `\n`);
 
-export const getFilterWrappedMarkup = (elements) => {
-  return `
-    <section class="main__filter filter container">
-      ${getFiltersMarkup(elements)}
-    </section>`;
+export const getFilterWrappedMarkup = (elements) => `
+  <section class="main__filter filter container">
+    ${getFiltersMarkup(elements)}
+  </section>`;
+
+const checkFilterOverdue = (task) =>
+  task.dueDate < Date.now();
+
+const checkFilterToday = (task) =>
+  formatDate(task.dueDate) === formatDate(Date.now());
+
+const checkFilterFavorite = (task) =>
+  task.isFavorite === true;
+
+const checkFilterRepeating = (task) =>
+  Object.keys(task.repeatingDays).some((day) => task.repeatingDays[day]);
+
+const checkFilterTags = (task) =>
+  task.tags.size > 0;
+
+const checkFilterArchived = (task) =>
+  task.isArchive === true;
+
+const getTaskCount = (data, cb) =>
+  data.filter(cb).length;
+
+export const getFilterElements = (tasks) => [
+  {title: `All`, count: tasks.length, isChecked: true},
+  {title: `Overdue`, count: getTaskCount(tasks, checkFilterOverdue)},
+  {title: `Today`, count: getTaskCount(tasks, checkFilterToday)},
+  {title: `Favorites`, count: getTaskCount(tasks, checkFilterFavorite)},
+  {title: `Repeating`, count: getTaskCount(tasks, checkFilterRepeating)},
+  {title: `Tags`, count: getTaskCount(tasks, checkFilterTags)},
+  {title: `Archive`, count: getTaskCount(tasks, checkFilterArchived)},
+];
+
+export const updateFilters = (filters) => {
+  filters.forEach((filter) => {
+    const node = document.querySelector(`.filter__${filter.title.toLowerCase()}-count`);
+    node.textContent = filter.count;
+  });
 };
-
-export const checkFilterOverdue = (task) => task.dueDate < Date.now();
-export const checkFilterToday = (task) => formatDate(task.dueDate) === formatDate(Date.now());
-export const checkFilterFavorite = (task) => task.isFavorite === true;
-export const checkFilterRepeating = (task) => Object.keys(task.repeatingDays).some((day) => task.repeatingDays[day]);
-export const checkFilterTags = (task) => task.tags.size > 0;
-export const checkFilterArchived = (task) => task.isArchive === true;
