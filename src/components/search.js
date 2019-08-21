@@ -1,5 +1,23 @@
-export const getSearchMarkup = () => {
-  return `
+import {createElement} from '../util/dom';
+
+export class Search {
+  constructor() {
+    this._element = null;
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return `
     <section class="main__search search container">
       <input
         type="text"
@@ -9,5 +27,6 @@ export const getSearchMarkup = () => {
       />
       <label class="visually-hidden" for="search__input">Search</label>
     </section>
-  `;
-};
+  `.trim();
+  }
+}
