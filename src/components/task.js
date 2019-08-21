@@ -1,5 +1,69 @@
 import {formatDate, formatTime} from './card-date';
-import {makeMarkupGenerator} from '../util/dom';
+import {makeMarkupGenerator, createElement} from '../util/dom';
+import {checkDeadline, checkRepeat} from '../util/task-utils';
+
+export class Task {
+  constructor({description, dueDate, repeatingDays, tags, color, isArchive, isFavorite}) {
+    this._description = description;
+    this._dueDate = new Date(dueDate);
+    this._tags = tags;
+    this._color = color;
+    this._repeatingDays = repeatingDays;
+    this._isArchive = isArchive;
+    this._isFavorite = isFavorite;
+    this._element = null;
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return `
+    <article class="card card--${this._color} ${checkRepeat(this._repeatingDays)} ${checkDeadline(this._dueDate)}">
+      <div class="card__form">
+        <div class="card__inner">
+          <div class="card__control">
+            <button type="button" class="card__btn card__btn--edit">
+              edit
+            </button>
+            <button type="button"
+            class="card__btn card__btn--archive ${this._isArchive ? `card__btn--disabled` : ``}">
+              archive
+            </button>
+            <button
+              type="button"
+              class="card__btn card__btn--favorites ${this._isFavorite ? `card__btn--disabled` : ``}"
+            >
+              favorites
+            </button>
+          </div>
+
+          <div class="card__color-bar">
+            <svg class="card__color-bar-wave" width="100%" height="10">
+              <use xlink:href="#wave"></use>
+            </svg>
+          </div>
+          ${getTextArea(this._description)}
+          <div class="card__settings">
+            <div class="card__details">
+              ${getDateMarkup(this._dueDate)}
+              ${this._tags.length > 0 ? wrapHashTagMarkup(this._tags) : ``}
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+    `.trim();
+  }
+}
 
 const getTextArea = (text) => `
   <div class="card__textarea-wrap">
@@ -33,48 +97,3 @@ const wrapHashTagMarkup = (tags) => `
     </div>
   </div>
 `;
-
-export const checkDeadline = (date) =>
-  Date.now() < date ? `` : `card--deadline`;
-
-export const checkRepeat = (days) =>
-  Object.keys(days).some((day) => days[day]) ? `card--repeat` : ``;
-
-const getTaskCardMarkup = ({description, dueDate, repeatingDays, tags, color, isFavorite, isArchive}) => `
-  <article class="card card--${color} ${checkRepeat(repeatingDays)} ${checkDeadline(dueDate)}">
-    <div class="card__form">
-      <div class="card__inner">
-        <div class="card__control">
-          <button type="button" class="card__btn card__btn--edit">
-            edit
-          </button>
-          <button type="button"
-          class="card__btn card__btn--archive ${isArchive ? `card__btn--disabled` : ``}">
-            archive
-          </button>
-          <button
-            type="button"
-            class="card__btn card__btn--favorites ${isFavorite ? `card__btn--disabled` : ``}"
-          >
-            favorites
-          </button>
-        </div>
-
-        <div class="card__color-bar">
-          <svg class="card__color-bar-wave" width="100%" height="10">
-            <use xlink:href="#wave"></use>
-          </svg>
-        </div>
-        ${getTextArea(description)}
-        <div class="card__settings">
-          <div class="card__details">
-            ${getDateMarkup(dueDate)}
-            ${tags.length > 0 ? wrapHashTagMarkup(tags) : ``}
-          </div>
-        </div>
-      </div>
-    </div>
-  </article>
-`.trim();
-
-export const getTasksMarkup = makeMarkupGenerator(getTaskCardMarkup, `\n`);
