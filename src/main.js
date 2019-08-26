@@ -78,7 +78,6 @@ const renderBoard = () => {
 };
 
 const renderLoadButton = () => {
-  const boardContainer = document.querySelector(`.board`);
   const loadButton = new LoadButton();
 
   const onLoadMoreButtonClick = () => {
@@ -102,7 +101,6 @@ const renderSearch = () => {
 };
 
 const renderSorting = () => {
-  const boardContainer = document.querySelector(`.board`);
   const sorting = new Sorting();
   render(boardContainer, sorting.getElement(), Position.AFTERBEGIN);
 };
@@ -139,8 +137,7 @@ const checkFilterOverdue = (task) =>
 const checkFilterToday = (task) =>
   formatDate(task.dueDate) === formatDate(Date.now());
 
-const checkFilterFavorite = (task) =>
-  task.isFavorite === true;
+const checkFilterFavorite = ({isFavorite}) => isFavorite;
 
 const checkFilterRepeating = (task) =>
   Object.keys(task.repeatingDays).some((day) => task.repeatingDays[day]);
@@ -148,8 +145,7 @@ const checkFilterRepeating = (task) =>
 const checkFilterTags = (task) =>
   task.tags.size > 0;
 
-const checkFilterArchived = (task) =>
-  task.isArchive === true;
+const checkFilterArchived = ({isArchive}) => isArchive;
 
 const getTaskCount = (task, cb) =>
   task.filter(cb).length;
@@ -179,8 +175,10 @@ renderFilterWrapper();
 filters.forEach(renderFilter);
 renderBoard();
 
+const boardContainer = document.querySelector(`.board`);
+
 if (tasks.filter((task) => task.isArchive === false).length === 0) {
-  render(document.querySelector(`.board`), createElement(getNoTaskTemplate()), Position.AFTERBEGIN);
+  render(boardContainer, createElement(getNoTaskTemplate()), Position.AFTERBEGIN);
 } else {
   renderSorting();
   loadedTasks.forEach(renderTask);
