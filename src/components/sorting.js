@@ -1,6 +1,6 @@
 import {createElement} from '../util/dom';
 
-export class Sorting {
+export default class Sorting {
   constructor() {
     this._element = null;
   }

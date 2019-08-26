@@ -1,6 +1,6 @@
-import {createFewElements} from '../util/dom';
+import {createElement} from '../util/dom';
 
-export class Filter {
+export default class Filter {
   constructor({title, count, isChecked}) {
     this._title = title;
     this._count = count;
@@ -9,7 +9,7 @@ export class Filter {
 
   getElement() {
     if (!this._element) {
-      this._element = createFewElements(this.getTemplate());
+      this._element = createElement(this.getTemplate());
     }
     return this._element;
   }

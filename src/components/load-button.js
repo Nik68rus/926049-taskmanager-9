@@ -1,6 +1,6 @@
 import {createElement} from '../util/dom';
 
-export class LoadButton {
+export default class LoadButton {
   constructor() {
     this._element = null;
   }

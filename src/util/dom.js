@@ -6,22 +6,24 @@ export const Position = {
 export const createElement = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
-  return newElement.firstChild;
+  return newElement.children.length === 1 ? newElement.firstChild : [...newElement.children];
 };
 
-export const createFewElements = (template) => {
-  const newElement = document.createElement(`div`);
-  newElement.innerHTML = template;
-  return newElement;
-};
-
-export const render = (container, element, place) => {
+export const render = (container, elements, place) => {
   switch (place) {
     case Position.AFTERBEGIN:
-      container.prepend(element);
+      if (elements.length > 1) {
+        elements.forEach((element) => container.prepend(element));
+      } else {
+        container.prepend(elements);
+      }
       break;
     case Position.BEFOREEND:
-      container.appendChild(element);
+      if (elements.length > 1) {
+        elements.forEach((element) => container.appendChild(element));
+      } else {
+        container.appendChild(elements);
+      }
       break;
   }
 };
