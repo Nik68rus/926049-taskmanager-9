@@ -50,7 +50,7 @@ const getTask = () => ({
   tags: getRandomTags(TAGS, getRandomNumber(0, 3)),
   color: getRandomItem(COLORS),
   isFavorite: getRandomBool(),
-  isArchive: true,
+  isArchive: getRandomBool(),
 });
 
 const getTasks = (num = TASK_NUM) =>
