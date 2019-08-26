@@ -2,7 +2,7 @@ import {formatDate, formatTime} from './card-date';
 import {makeMarkupGenerator, createElement} from '../util/dom';
 import {checkDeadline, checkRepeat} from '../util/task-utils';
 
-export class Task {
+export default class Task {
   constructor({description, dueDate, repeatingDays, tags, color, isArchive, isFavorite}) {
     this._description = description;
     this._dueDate = new Date(dueDate);

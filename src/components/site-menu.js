@@ -1,6 +1,6 @@
-import {createFewElements} from '../util/dom';
+import {createElement} from '../util/dom';
 
-export class SiteMenu {
+export default class SiteMenu {
   constructor({name, isChecked}) {
     this._name = name;
     this._isChecked = isChecked;
@@ -9,7 +9,7 @@ export class SiteMenu {
 
   getElement() {
     if (!this._element) {
-      this._element = createFewElements(this.getTemplate());
+      this._element = createElement(this.getTemplate());
     }
     return this._element;
   }

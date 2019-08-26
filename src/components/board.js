@@ -1,6 +1,6 @@
 import {createElement} from '../util/dom';
 
-export class Board {
+export default class Board {
   constructor() {
     this._element = null;
   }

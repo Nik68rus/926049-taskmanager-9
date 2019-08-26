@@ -3,7 +3,7 @@ import {formatDate, formatTime} from './card-date';
 import {COLORS} from '../mock';
 import {checkDeadline, checkRepeat} from '../util/task-utils';
 
-export class TaskEdit {
+export default class TaskEdit {
   constructor({description, dueDate, repeatingDays, tags, color, isFavorite, isArchive}) {
     this._description = description;
     this._dueDate = new Date(dueDate);

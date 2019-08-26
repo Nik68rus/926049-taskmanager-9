@@ -10,13 +10,12 @@ import {
   formatDate,
 } from './components';
 
-import {render, Position} from './util/dom';
-
+import {render, createElement, Position} from './util/dom';
+import {isEscapeKey} from './util/predicates';
 import {Mock, TASK_LOAD_NUMB} from './mock';
 
-const tasks = Mock.load();
-
-let loadedTasks = tasks.slice(0, TASK_LOAD_NUMB);
+const menuContainer = document.querySelector(`.main__control`);
+const mainContainer = document.querySelector(`.main`);
 
 const menuElements = [
   {name: `new-task`},
@@ -24,12 +23,23 @@ const menuElements = [
   {name: `statistic`},
 ];
 
+const getFilterElements = (data) => [
+  {title: `All`, count: data.length, isChecked: true},
+  {title: `Overdue`, count: getTaskCount(data, checkFilterOverdue)},
+  {title: `Today`, count: getTaskCount(data, checkFilterToday)},
+  {title: `Favorites`, count: getTaskCount(data, checkFilterFavorite)},
+  {title: `Repeating`, count: getTaskCount(data, checkFilterRepeating)},
+  {title: `Tags`, count: getTaskCount(data, checkFilterTags)},
+  {title: `Archive`, count: getTaskCount(data, checkFilterArchived)},
+];
+
 const renderTask = (taskMock) => {
+  const taskBoard = document.querySelector(`.board__tasks`);
   const task = new Task(taskMock);
   const taskEdit = new TaskEdit(taskMock);
 
   const onEscKeyDown = (evt) => {
-    if (evt.key === `Escape` || evt.key === `Esc`) {
+    if (isEscapeKey(evt)) {
       taskBoard.replaceChild(task.getElement(), taskEdit.getElement());
       document.removeEventListener(`keydown`, onEscKeyDown);
     }
@@ -68,6 +78,7 @@ const renderBoard = () => {
 };
 
 const renderLoadButton = () => {
+  const boardContainer = document.querySelector(`.board`);
   const loadButton = new LoadButton();
 
   const onLoadMoreButtonClick = () => {
@@ -91,6 +102,7 @@ const renderSearch = () => {
 };
 
 const renderSorting = () => {
+  const boardContainer = document.querySelector(`.board`);
   const sorting = new Sorting();
   render(boardContainer, sorting.getElement(), Position.AFTERBEGIN);
 };
@@ -102,6 +114,7 @@ const renderMenuWrapper = () => {
 };
 
 const renderMenu = (menuItem) => {
+  const menuWrapper = mainContainer.querySelector(`.control__btn-wrap`);
   const menu = new SiteMenu(menuItem);
   render(menuWrapper, menu.getElement(), Position.BEFOREEND);
 };
@@ -115,6 +128,7 @@ const renderFilterWrapper = () => {
 };
 
 const renderFilter = (filterItem) => {
+  const filterContainer = mainContainer.querySelector(`.filter`);
   const filter = new Filter(filterItem);
   render(filterContainer, filter.getElement(), Position.BEFOREEND);
 };
@@ -147,40 +161,28 @@ const updateFilters = (filters) => {
   });
 };
 
-const getFilterElements = (data) => [
-  {title: `All`, count: data.length, isChecked: true},
-  {title: `Overdue`, count: getTaskCount(data, checkFilterOverdue)},
-  {title: `Today`, count: getTaskCount(data, checkFilterToday)},
-  {title: `Favorites`, count: getTaskCount(data, checkFilterFavorite)},
-  {title: `Repeating`, count: getTaskCount(data, checkFilterRepeating)},
-  {title: `Tags`, count: getTaskCount(data, checkFilterTags)},
-  {title: `Archive`, count: getTaskCount(data, checkFilterArchived)},
-];
+const getNoTaskTemplate = () => `
+  <p class="board__no-tasks">
+    Congratulations, all tasks were completed! To create a new click on
+    «add new task» button.
+  </p>
+`.trim();
 
+const tasks = Mock.load();
+let loadedTasks = tasks.slice(0, TASK_LOAD_NUMB);
 const filters = getFilterElements(loadedTasks);
 
-
-const menuContainer = document.querySelector(`.main__control`);
-const mainContainer = document.querySelector(`.main`);
-
 renderMenuWrapper();
-
-const menuWrapper = document.querySelector(`.control__btn-wrap`);
-
-menuElements.forEach((item) => renderMenu(item));
-
+menuElements.forEach(renderMenu);
 renderSearch();
 renderFilterWrapper();
-const filterContainer = document.querySelector(`.filter`);
-filters.forEach((filter) => renderFilter(filter));
+filters.forEach(renderFilter);
 renderBoard();
 
-const taskBoard = document.querySelector(`.board__tasks`);
-
-const boardContainer = document.querySelector(`.board`);
-
-renderSorting();
-
-loadedTasks.forEach((taskMock) => renderTask(taskMock));
-
-renderLoadButton();
+if (tasks.filter((task) => task.isArchive === false).length === 0) {
+  render(document.querySelector(`.board`), createElement(getNoTaskTemplate()), Position.AFTERBEGIN);
+} else {
+  renderSorting();
+  loadedTasks.forEach(renderTask);
+  renderLoadButton();
+}
