@@ -1,17 +1,12 @@
 import {
   Search,
-  TaskEdit,
-  Board,
-  Sorting,
-  LoadButton,
-  Task,
   SiteMenu,
   Filter,
   formatDate,
 } from './components';
 
-import {render, createElement, Position} from './util/dom';
-import {isEscapeKey} from './util/predicates';
+import BoardController from './controllers/board';
+import {render, Position} from './util/dom';
 import {Mock, TASK_LOAD_NUMB} from './mock';
 
 const menuContainer = document.querySelector(`.main__control`);
@@ -33,76 +28,9 @@ const getFilterElements = (data) => [
   {title: `Archive`, count: getTaskCount(data, checkFilterArchived)},
 ];
 
-const renderTask = (taskMock) => {
-  const taskBoard = document.querySelector(`.board__tasks`);
-  const task = new Task(taskMock);
-  const taskEdit = new TaskEdit(taskMock);
-
-  const onEscKeyDown = (evt) => {
-    if (isEscapeKey(evt)) {
-      taskBoard.replaceChild(task.getElement(), taskEdit.getElement());
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    }
-  };
-
-  task.getElement()
-    .querySelector(`.card__btn--edit`)
-    .addEventListener(`click`, () => {
-      taskBoard.replaceChild(taskEdit.getElement(), task.getElement());
-      document.addEventListener(`keydown`, onEscKeyDown);
-    });
-
-  taskEdit.getElement().querySelector(`textarea`)
-    .addEventListener(`focus`, () => {
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    });
-
-  taskEdit.getElement().querySelector(`textarea`)
-    .addEventListener(`blur`, () => {
-      document.addEventListener(`keydown`, onEscKeyDown);
-    });
-
-  taskEdit.getElement()
-    .querySelector(`.card__save`)
-    .addEventListener(`click`, () => {
-      taskBoard.replaceChild(task.getElement(), taskEdit.getElement());
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    });
-
-  render(taskBoard, task.getElement(), Position.BEFOREEND);
-};
-
-const renderBoard = () => {
-  const board = new Board();
-  render(mainContainer, board.getElement(), Position.BEFOREEND);
-};
-
-const renderLoadButton = () => {
-  const loadButton = new LoadButton();
-
-  const onLoadMoreButtonClick = () => {
-    const renderingTasks = tasks.slice(loadedTasks.length, loadedTasks.length + TASK_LOAD_NUMB);
-    renderingTasks.forEach((taskMock) => renderTask(taskMock));
-    loadedTasks = loadedTasks.concat(renderingTasks);
-    if (renderingTasks.length < TASK_LOAD_NUMB) {
-      loadButton.getElement().style.display = `none`;
-      loadButton.getElement().removeEventListener(`click`, onLoadMoreButtonClick);
-    }
-    updateFilters(getFilterElements(loadedTasks));
-  };
-
-  loadButton.getElement().addEventListener(`click`, onLoadMoreButtonClick);
-  render(boardContainer, loadButton.getElement(), Position.BEFOREEND);
-};
-
 const renderSearch = () => {
   const search = new Search();
   render(mainContainer, search.getElement(), Position.BEFOREEND);
-};
-
-const renderSorting = () => {
-  const sorting = new Sorting();
-  render(boardContainer, sorting.getElement(), Position.AFTERBEGIN);
 };
 
 const renderMenuWrapper = () => {
@@ -157,13 +85,6 @@ const updateFilters = (filters) => {
   });
 };
 
-const getNoTaskTemplate = () => `
-  <p class="board__no-tasks">
-    Congratulations, all tasks were completed! To create a new click on
-    «add new task» button.
-  </p>
-`.trim();
-
 const tasks = Mock.load();
 let loadedTasks = tasks.slice(0, TASK_LOAD_NUMB);
 const filters = getFilterElements(loadedTasks);
@@ -173,14 +94,7 @@ menuElements.forEach(renderMenu);
 renderSearch();
 renderFilterWrapper();
 filters.forEach(renderFilter);
-renderBoard();
+updateFilters(getFilterElements(tasks));
 
-const boardContainer = document.querySelector(`.board`);
-
-if (tasks.filter((task) => task.isArchive === false).length === 0) {
-  render(boardContainer, createElement(getNoTaskTemplate()), Position.AFTERBEGIN);
-} else {
-  renderSorting();
-  loadedTasks.forEach(renderTask);
-  renderLoadButton();
-}
+const boardController = new BoardController(mainContainer, tasks);
+boardController.init();
