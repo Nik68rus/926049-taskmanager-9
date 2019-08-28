@@ -8,7 +8,7 @@ import Board from './board';
 import Sorting from './sorting';
 import LoadButton from './load-button';
 import Task from './task';
-import NoTasks from './no-tasks';
+import BoardEmpty from './board-empty';
 import {formatDate} from './card-date';
 
 export {
@@ -22,6 +22,6 @@ export {
   Sorting,
   LoadButton,
   Task,
-  NoTasks,
+  BoardEmpty,
   formatDate,
 };

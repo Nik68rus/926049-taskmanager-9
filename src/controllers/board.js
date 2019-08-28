@@ -4,38 +4,39 @@ import {
   TaskEdit,
   TaskList,
   Sorting,
-  NoTasks,
   LoadButton,
+  BoardEmpty,
 } from '../components';
 
 import {render, Position} from '../util/dom';
 import {isEscapeKey} from '../util/predicates';
-
-const TASK_LOAD_NUMB = 8;
+import {TASK_LOAD_NUM} from '../mock';
 
 export default class BoardController {
   constructor(container, tasks) {
     this._container = container;
     this._tasks = tasks;
-    this._loadedTasks = TASK_LOAD_NUMB;
+    this._loadedTasks = TASK_LOAD_NUM;
     this._board = new Board();
     this._taskList = new TaskList();
-    this._noTasks = new NoTasks();
+    this._boardEmpty = new BoardEmpty();
     this._sorting = new Sorting();
     this._loadButton = new LoadButton();
+    this._onLoadButtonClick = this._onLoadButtonClick.bind(this);
   }
 
   init() {
-    render(this._container, this._board.getElement(), Position.BEFOREEND);
+    const boardElement = this._board.getElement();
+    render(this._container, boardElement, Position.BEFOREEND);
 
-    if (this._tasks.filter((task) => task.isArchive === false).length === 0) {
-      render(this._board.getElement(), this._noTasks.getElement(), Position.AFTERBEGIN);
+    if (this._tasks.every(({isArchive}) => isArchive)) {
+      render(boardElement, this._boardEmpty.getElement(), Position.AFTERBEGIN);
     } else {
-      render(this._board.getElement(), this._sorting.getElement(), Position.AFTERBEGIN);
-      render(this._board.getElement(), this._taskList.getElement(), Position.BEFOREEND);
-      this._tasks.slice(0, TASK_LOAD_NUMB).forEach((taskMock) => this._renderTask(taskMock));
-      render(this._board.getElement(), this._loadButton.getElement(), Position.BEFOREEND);
-      this._loadButton.getElement().addEventListener(`click`, (evt) => this._onLoadButtonClick(evt));
+      render(boardElement, this._sorting.getElement(), Position.AFTERBEGIN);
+      render(boardElement, this._taskList.getElement(), Position.BEFOREEND);
+      this._tasks.slice(0, TASK_LOAD_NUM).forEach((taskMock) => this._renderTask(taskMock));
+      render(boardElement, this._loadButton.getElement(), Position.BEFOREEND);
+      this._loadButton.getElement().addEventListener(`click`, this._onLoadButtonClick);
     }
   }
 
@@ -78,12 +79,12 @@ export default class BoardController {
   }
 
   _onLoadButtonClick() {
-    const renderingTasks = this._tasks.slice(this._loadedTasks, this._loadedTasks + TASK_LOAD_NUMB);
-    this._loadedTasks += TASK_LOAD_NUMB;
-    renderingTasks.forEach((taskMock) => this._renderTask(taskMock));
-    if (renderingTasks.length < TASK_LOAD_NUMB) {
+    const renderingTasks = this._tasks.slice(this._loadedTasks, this._loadedTasks + TASK_LOAD_NUM);
+    this._loadedTasks += TASK_LOAD_NUM;
+    renderingTasks.forEach((task) => this._renderTask(task));
+    if (renderingTasks.length < TASK_LOAD_NUM) {
       this._loadButton.getElement().style.display = `none`;
-      this._loadButton.getElement().removeEventListener(`click`, this._onLoadMoreButtonClick);
+      this._loadButton.getElement().removeEventListener(`click`, this._onLoadButtonClick);
     }
   }
 

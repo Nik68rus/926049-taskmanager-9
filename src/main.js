@@ -7,7 +7,7 @@ import {
 
 import BoardController from './controllers/board';
 import {render, Position} from './util/dom';
-import {Mock, TASK_LOAD_NUMB} from './mock';
+import {Mock, TASK_LOAD_NUM} from './mock';
 
 const menuContainer = document.querySelector(`.main__control`);
 const mainContainer = document.querySelector(`.main`);
@@ -19,7 +19,7 @@ const menuElements = [
 ];
 
 const getFilterElements = (data) => [
-  {title: `All`, count: data.length, isChecked: true},
+  {title: `All`, count: getTaskCount(data, checkFilterAll), isChecked: true},
   {title: `Overdue`, count: getTaskCount(data, checkFilterOverdue)},
   {title: `Today`, count: getTaskCount(data, checkFilterToday)},
   {title: `Favorites`, count: getTaskCount(data, checkFilterFavorite)},
@@ -59,6 +59,9 @@ const renderFilter = (filterItem) => {
   render(filterContainer, filter.getElement(), Position.BEFOREEND);
 };
 
+const checkFilterAll = (task) =>
+  !task.isArchive;
+
 const checkFilterOverdue = (task) =>
   task.dueDate < Date.now();
 
@@ -86,7 +89,7 @@ const updateFilters = (filters) => {
 };
 
 const tasks = Mock.load();
-let loadedTasks = tasks.slice(0, TASK_LOAD_NUMB);
+let loadedTasks = tasks.slice(0, TASK_LOAD_NUM);
 const filters = getFilterElements(loadedTasks);
 
 renderMenuWrapper();

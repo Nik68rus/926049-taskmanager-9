@@ -1,6 +1,6 @@
 import AbstractComponent from './abstarct-component';
 
-export default class NoTasks extends AbstractComponent {
+export default class BoardEmpty extends AbstractComponent {
   getTemplate() {
     return `
     <p class="board__no-tasks">

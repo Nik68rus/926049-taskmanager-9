@@ -9,7 +9,7 @@ const DESCRIPTIONS = [
   `Пройти интенсив на соточку`,
 ];
 
-export const TASK_LOAD_NUMB = 8;
+export const TASK_LOAD_NUM = 8;
 
 export const COLORS = [
   `black`,
