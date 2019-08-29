@@ -16,6 +16,7 @@ export default class BoardController {
   constructor(container, tasks) {
     this._container = container;
     this._tasks = tasks;
+    this._sortedTasks = tasks;
     this._loadedTasks = TASK_LOAD_NUM;
     this._board = new Board();
     this._taskList = new TaskList();
@@ -37,6 +38,7 @@ export default class BoardController {
       this._tasks.slice(0, TASK_LOAD_NUM).forEach((taskMock) => this._renderTask(taskMock));
       render(boardElement, this._loadButton.getElement(), Position.BEFOREEND);
       this._loadButton.getElement().addEventListener(`click`, this._onLoadButtonClick);
+      this._sorting.getElement().addEventListener(`click`, (evt) => this._onSortLinkClick(evt));
     }
   }
 
@@ -79,7 +81,7 @@ export default class BoardController {
   }
 
   _onLoadButtonClick() {
-    const renderingTasks = this._tasks.slice(this._loadedTasks, this._loadedTasks + TASK_LOAD_NUM);
+    const renderingTasks = this._sortedTasks.slice(this._loadedTasks, this._loadedTasks + TASK_LOAD_NUM);
     this._loadedTasks += TASK_LOAD_NUM;
     renderingTasks.forEach((task) => this._renderTask(task));
     if (renderingTasks.length < TASK_LOAD_NUM) {
@@ -88,5 +90,27 @@ export default class BoardController {
     }
   }
 
+  _onSortLinkClick(evt) {
+    evt.preventDefault();
+
+    if (evt.target.tagName.toLowerCase() !== `a`) {
+      return;
+    }
+
+    this._taskList.getElement().innerHTML = ``;
+
+    switch (evt.target.dataset.sortType) {
+      case `date-up`:
+        this._sortedTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+        break;
+      case `date-down`:
+        this._sortedTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+        break;
+      case `default`:
+        this._sortedTasks = this._tasks;
+        break;
+    }
+    this._sortedTasks.slice(0, this._loadedTasks).forEach((task) => this._renderTask(task));
+  }
 }
 
