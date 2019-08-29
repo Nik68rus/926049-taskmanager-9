@@ -1,9 +1,11 @@
 import {formatDate, formatTime} from './card-date';
-import {makeMarkupGenerator, createElement} from '../util/dom';
+import {makeMarkupGenerator} from '../util/dom';
 import {checkDeadline, checkRepeat} from '../util/task-utils';
+import AbstractComponent from './abstarct-component';
 
-export default class Task {
+export default class Task extends AbstractComponent {
   constructor({description, dueDate, repeatingDays, tags, color, isArchive, isFavorite}) {
+    super();
     this._description = description;
     this._dueDate = new Date(dueDate);
     this._tags = tags;
@@ -11,18 +13,6 @@ export default class Task {
     this._repeatingDays = repeatingDays;
     this._isArchive = isArchive;
     this._isFavorite = isFavorite;
-    this._element = null;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 
   getTemplate() {
