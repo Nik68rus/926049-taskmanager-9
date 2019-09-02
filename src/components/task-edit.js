@@ -33,7 +33,10 @@ export default class TaskEdit extends AbstractComponent {
   }
 
   _dateInit() {
-    const onDateClick = () => {
+    const date = this.getElement().querySelector(`.card__date`);
+    let dateTime = this.getElement().querySelector(`.card__datetime`);
+
+    const onDateToggleClick = () => {
       const status = this.getElement().querySelector(`.card__date-status`);
       const deadline = this.getElement().querySelector(`.card__date-deadline`);
       if (status.textContent === `yes`) {
@@ -42,7 +45,18 @@ export default class TaskEdit extends AbstractComponent {
       this._changeStatus(deadline, status);
     };
 
-    this.getElement().querySelector(`.card__date-deadline-toggle`).addEventListener(`click`, onDateClick);
+    const onDateChange = () => {
+      dateTime.dateTime = date.value;
+      date.value = moment(dateTime.dateTime).format(`MMMM D h:mm A`).toUpperCase();
+      if (new Date(dateTime.dateTime) > Date.now()) {
+        this.getElement().classList.remove(`card--deadline`);
+      } else {
+        this.getElement().classList.add(`card--deadline`);
+      }
+    };
+
+    date.addEventListener(`change`, onDateChange);
+    this.getElement().querySelector(`.card__date-deadline-toggle`).addEventListener(`click`, onDateToggleClick);
   }
 
   _repeatInit() {
