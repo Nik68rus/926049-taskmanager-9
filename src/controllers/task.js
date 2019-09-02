@@ -5,6 +5,9 @@ import {
 
 import {isEscapeKey} from '../util/predicates';
 import {render, Position} from '../util/dom';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import 'flatpickr/dist/themes/light.css';
 
 export default class TaskController {
   constructor(container, task, onDataChange, onChangeView) {
@@ -25,6 +28,7 @@ export default class TaskController {
 
   _init() {
     const description = this._taskEdit.getElement().querySelector(`textarea`);
+
     const onEscKeyDown = (evt) => {
       if (isEscapeKey(evt)) {
         this._taskEdit.getElement().querySelector(`.card__form`).reset();
@@ -32,6 +36,12 @@ export default class TaskController {
         document.removeEventListener(`keydown`, onEscKeyDown);
       }
     };
+
+    flatpickr(this._taskEdit.getElement().querySelector(`.card__date`), {
+      altInput: true,
+      allowInput: true,
+      defaultDate: this._task.dueDate,
+    });
 
     this._taskView.getElement()
       .querySelector(`.card__btn--edit`)
@@ -62,7 +72,7 @@ export default class TaskController {
           description: formData.get(`text`),
           color: formData.get(`color`),
           tags: new Set(formData.getAll(`hashtag`)),
-          dueDate: formData.get(`date`) ? new Date(date) : null,
+          dueDate: formData.get(`date`) ? new Date(formData.get(`date`)) : null,
           repeatingDays: formData.getAll(`repeat`).reduce((acc, it) => {
             acc[it] = true;
             return acc;
