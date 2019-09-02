@@ -7,7 +7,7 @@ export default class Task extends AbstractComponent {
   constructor({description, dueDate, repeatingDays, tags, color, isArchive, isFavorite}) {
     super();
     this._description = description;
-    this._dueDate = new Date(dueDate);
+    this._dueDate = dueDate === null ? null : new Date(dueDate);
     this._tags = tags;
     this._color = color;
     this._repeatingDays = repeatingDays;
@@ -45,7 +45,7 @@ export default class Task extends AbstractComponent {
           <div class="card__settings">
             <div class="card__details">
               ${getDateMarkup(this._dueDate)}
-              ${this._tags.length > 0 ? wrapHashTagMarkup(this._tags) : ``}
+              ${[...this._tags].length > 0 ? wrapHashTagMarkup([...this._tags]) : ``}
             </div>
           </div>
         </div>
@@ -60,12 +60,13 @@ const getTextArea = (text) => `
     <p class="card__text">${text}</p>
   </div>`.trim();
 
-const getDateMarkup = (date) => `
+const getDateMarkup = (date) => date === null ? `` : `
   <div class="card__dates">
     <div class="card__date-deadline">
       <p class="card__input-deadline-wrap">
         <span class="card__date">${formatDate(date)}</span>
         <span class="card__time">${formatTime(date)}</span>
+        <time class ="card__datetime" datetime="${date}">
       </p>
     </div>
   </div>`;

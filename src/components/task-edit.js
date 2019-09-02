@@ -3,17 +3,125 @@ import AbstractComponent from './abstarct-component';
 import {formatDate, formatTime} from './card-date';
 import {COLORS} from '../mock';
 import {checkDeadline, checkRepeat} from '../util/task-utils';
+import {isEnterKey} from '../util/predicates';
 
 export default class TaskEdit extends AbstractComponent {
   constructor({description, dueDate, repeatingDays, tags, color, isFavorite, isArchive}) {
     super();
     this._description = description;
-    this._dueDate = new Date(dueDate);
+    this._dueDate = dueDate === null ? null : new Date(dueDate);
     this._tags = tags;
     this._color = color;
     this._repeatingDays = repeatingDays;
     this._isArchive = isArchive;
     this._isFavorite = isFavorite;
+
+    this._dateInit();
+    this._repeatInit();
+    this._colorInit();
+    this._hashtagInit();
+  }
+
+  _changeStatus(parameter, status) {
+    if (status.textContent === `yes`) {
+      status.textContent = `no`;
+      parameter.style.display = `none`;
+    } else {
+      status.textContent = `yes`;
+      parameter.style.display = `block`;
+    }
+  }
+
+  _dateInit() {
+    const onDateClick = () => {
+      const status = this.getElement().querySelector(`.card__date-status`);
+      const deadline = this.getElement().querySelector(`.card__date-deadline`);
+      if (status.textContent === `yes`) {
+        this.getElement().querySelector(`.card__date`).value = ``;
+      }
+      this._changeStatus(deadline, status);
+    };
+
+    this.getElement().querySelector(`.card__date-deadline-toggle`).addEventListener(`click`, onDateClick);
+  }
+
+  _repeatInit() {
+    const repeatDays = this.getElement().querySelector(`.card__repeat-days`);
+    const status = this.getElement().querySelector(`.card__repeat-status`);
+
+    if (status.textContent === `no`) {
+      repeatDays.style.display = `none`;
+    }
+
+    const onRepeatClick = () => {
+      const repeatDayCheckboxes = repeatDays.querySelectorAll(`.card__repeat-day-input`);
+
+      if (status.textContent === `yes`) {
+        this.getElement().classList.remove(`card--repeat`);
+        repeatDayCheckboxes.forEach((it) => {
+          it.checked = false;
+        });
+      } else {
+        this.getElement().classList.add(`card--repeat`);
+      }
+      this._changeStatus(repeatDays, status);
+    };
+
+    this.getElement().querySelector(`.card__repeat-toggle`).addEventListener(`click`, onRepeatClick);
+  }
+
+  _colorInit() {
+    const colorInputs = this.getElement().querySelectorAll(`.card__color-input`);
+
+    const onColorChange = (evt) => {
+      COLORS.forEach((it) => {
+        this.getElement().classList.remove(`card--${it}`);
+      });
+      this.getElement().classList.add(`card--${evt.target.value}`);
+    };
+
+    colorInputs.forEach((color) => {
+      color.addEventListener(`change`, onColorChange);
+    });
+  }
+
+  _hashtagInit() {
+    const hashtagInput = this.getElement().querySelector(`.card__hashtag-input`);
+    const hashtagDelete = this.getElement().querySelectorAll(`.card__hashtag-delete`);
+
+    const onEnterKeyDown = (evt) => {
+      if (isEnterKey(evt)) {
+        evt.preventDefault();
+        this.getElement().querySelector(`.card__hashtag-list`).insertAdjacentHTML(`beforeend`, `
+          <span class="card__hashtag-inner">
+            <input
+              type="hidden"
+              name="hashtag"
+              value="${evt.target.value}"
+              class="card__hashtag-hidden-input"
+            />
+            <p class="card__hashtag-name">
+              #${evt.target.value}
+            </p>
+            <button type="button" class="card__hashtag-delete">
+              delete
+            </button>
+          </span>`);
+        evt.target.value = ``;
+        const tagDeleteNodes = this.getElement().querySelectorAll(`.card__hashtag-delete`);
+        tagDeleteNodes[tagDeleteNodes.length - 1].addEventListener(`click`, onHashtagDeleteClick);
+      }
+    };
+
+    const onHashtagDeleteClick = (evt) => {
+      evt.target.closest(`span`).remove();
+      evt.target.removeEventListener(`click`, onHashtagDeleteClick);
+    };
+
+    hashtagInput.addEventListener(`keydown`, onEnterKeyDown);
+    hashtagDelete.forEach((it) => {
+      it.addEventListener(`click`, onHashtagDeleteClick);
+    });
   }
 
   getTemplate() {
@@ -53,21 +161,11 @@ export default class TaskEdit extends AbstractComponent {
             <div class="card__details">
               <div class="card__dates">
                 <button class="card__date-deadline-toggle" type="button">
-                  date: <span class="card__date-status">yes</span>
+                  date: <span class="card__date-status">${this._dueDate === null ? `no` : `yes`}</span>
                 </button>
-
                 <fieldset class="card__date-deadline">
-                  <label class="card__input-deadline-wrap">
-                    <input
-                      class="card__date"
-                      type="text"
-                      placeholder=""
-                      name="date"
-                      value="${formatDate(this._dueDate) + ` ` + formatTime(this._dueDate)}"
-                    />
-                  </label>
+                  ${getDateMarkup(this._dueDate)}
                 </fieldset>
-
                 <button class="card__repeat-toggle" type="button">
                   repeat:<span class="card__repeat-status">${checkRepeat(this._repeatingDays) ? `yes` : `no`}</span>
                 </button>
@@ -81,7 +179,7 @@ export default class TaskEdit extends AbstractComponent {
 
               <div class="card__hashtag">
                 <div class="card__hashtag-list">
-                  ${getHashtagsMarkup(this._tags)}
+                  ${getHashtagsMarkup([...this._tags])}
                 </div>
 
                 <label>
@@ -114,6 +212,19 @@ export default class TaskEdit extends AbstractComponent {
   }
 }
 
+const getDateMarkup = (date) => date === null ? `` : `
+  <label class="card__input-deadline-wrap">
+    <input
+      class="card__date"
+      type="text"
+      placeholder=""
+      name="date"
+      value="${formatDate(date)} ${formatTime(date)}"
+    />
+    <time class ="card__datetime" datetime="${date}">
+  </label>
+`;
+
 const getRepeatDayMarkup = (days) => Object.keys(days).map((day) => `
   <input
     class="visually-hidden card__repeat-day-input"
@@ -134,7 +245,7 @@ const getHashtagMarkup = (tag) => `
   <input
     type="hidden"
     name="hashtag"
-    value="repeat"
+    value="${tag}"
     class="card__hashtag-hidden-input"
   />
   <p class="card__hashtag-name">

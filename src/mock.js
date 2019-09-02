@@ -40,7 +40,7 @@ const getRepeatingDays = (days) =>
 
 const getRandomSorting = () => Math.random() - 0.5;
 
-const getRandomTags = ([...tags], num = MAX_TAGS_NUMBER) =>
+const getRandomTags = (tags, num = MAX_TAGS_NUMBER) =>
   tags.sort(getRandomSorting).slice(0, num);
 
 const getTask = () => ({
