@@ -1,6 +1,6 @@
 import {makeMarkupGenerator} from '../util/dom';
 import AbstractComponent from './abstarct-component';
-import {formatDate, formatTime} from './card-date';
+import moment from 'moment';
 import {COLORS} from '../mock';
 import {checkDeadline, checkRepeat} from '../util/task-utils';
 import {isEnterKey} from '../util/predicates';
@@ -219,7 +219,7 @@ const getDateMarkup = (date) => date === null ? `` : `
       type="text"
       placeholder=""
       name="date"
-      value="${formatDate(date)} ${formatTime(date)}"
+      value="${moment(date).format(`D MMMM h:mm a`).toUpperCase()}"
     />
     <time class ="card__datetime" datetime="${date}">
   </label>

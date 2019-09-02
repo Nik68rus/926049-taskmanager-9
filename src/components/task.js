@@ -1,7 +1,7 @@
-import {formatDate, formatTime} from './card-date';
 import {makeMarkupGenerator} from '../util/dom';
 import {checkDeadline, checkRepeat} from '../util/task-utils';
 import AbstractComponent from './abstarct-component';
+import moment from 'moment';
 
 export default class Task extends AbstractComponent {
   constructor({description, dueDate, repeatingDays, tags, color, isArchive, isFavorite}) {
@@ -64,8 +64,8 @@ const getDateMarkup = (date) => date === null ? `` : `
   <div class="card__dates">
     <div class="card__date-deadline">
       <p class="card__input-deadline-wrap">
-        <span class="card__date">${formatDate(date)}</span>
-        <span class="card__time">${formatTime(date)}</span>
+        <span class="card__date">${moment(date).format(`D MMMM`).toUpperCase()}</span>
+        <span class="card__time">${moment(date).format(`h:mm a`).toUpperCase()}</span>
         <time class ="card__datetime" datetime="${date}">
       </p>
     </div>

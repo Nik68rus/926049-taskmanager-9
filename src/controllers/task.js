@@ -28,6 +28,7 @@ export default class TaskController {
 
   _init() {
     const description = this._taskEdit.getElement().querySelector(`textarea`);
+    const date = this._taskEdit.getElement().querySelector(`.card__date`);
 
     const onEscKeyDown = (evt) => {
       if (isEscapeKey(evt)) {
@@ -37,9 +38,11 @@ export default class TaskController {
       }
     };
 
-    flatpickr(this._taskEdit.getElement().querySelector(`.card__date`), {
+    flatpickr(date, {
+      dateFormat: `j F h:i K`, // вот это не воспринимает почему-то
       altInput: true,
       allowInput: true,
+      enableTime: true,
       defaultDate: this._task.dueDate,
     });
 
@@ -67,7 +70,6 @@ export default class TaskController {
       .addEventListener(`click`, (evt) => {
         evt.preventDefault();
         const formData = new FormData(this._taskEdit.getElement().querySelector(`.card__form`));
-        const date = this._taskEdit.getElement().querySelector(`.card__datetime`).dateTime;
         const entry = {
           description: formData.get(`text`),
           color: formData.get(`color`),
