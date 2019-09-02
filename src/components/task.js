@@ -66,6 +66,7 @@ const getDateMarkup = (date) => date === null ? `` : `
       <p class="card__input-deadline-wrap">
         <span class="card__date">${formatDate(date)}</span>
         <span class="card__time">${formatTime(date)}</span>
+        <time class ="card__datetime" datetime="${date}">
       </p>
     </div>
   </div>`;

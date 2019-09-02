@@ -22,19 +22,24 @@ export default class TaskEdit extends AbstractComponent {
     this._hashtagInit();
   }
 
+  _changeStatus(parameter, status) {
+    if (status.textContent === `yes`) {
+      status.textContent = `no`;
+      parameter.style.display = `none`;
+    } else {
+      status.textContent = `yes`;
+      parameter.style.display = `block`;
+    }
+  }
+
   _dateInit() {
     const onDateClick = () => {
       const status = this.getElement().querySelector(`.card__date-status`);
       const deadline = this.getElement().querySelector(`.card__date-deadline`);
-
       if (status.textContent === `yes`) {
-        status.textContent = `no`;
-        deadline.style.display = `none`;
         this.getElement().querySelector(`.card__date`).value = ``;
-      } else {
-        status.textContent = `yes`;
-        deadline.style.display = `block`;
       }
+      this._changeStatus(deadline, status);
     };
 
     this.getElement().querySelector(`.card__date-deadline-toggle`).addEventListener(`click`, onDateClick);
@@ -52,52 +57,32 @@ export default class TaskEdit extends AbstractComponent {
       const repeatDayCheckboxes = repeatDays.querySelectorAll(`.card__repeat-day-input`);
 
       if (status.textContent === `yes`) {
-        status.textContent = `no`;
         this.getElement().classList.remove(`card--repeat`);
-        repeatDays.style.display = `none`;
         repeatDayCheckboxes.forEach((it) => {
           it.checked = false;
         });
       } else {
-        status.textContent = `yes`;
         this.getElement().classList.add(`card--repeat`);
-        repeatDays.style.display = `block`;
       }
+      this._changeStatus(repeatDays, status);
     };
 
     this.getElement().querySelector(`.card__repeat-toggle`).addEventListener(`click`, onRepeatClick);
   }
 
   _colorInit() {
-    const onColorClick = (evt) => {
-      if (evt.target.tagName.toLowerCase() !== `label`) {
-        return;
-      }
+    const colorInputs = this.getElement().querySelectorAll(`.card__color-input`);
 
+    const onColorChange = (evt) => {
       COLORS.forEach((it) => {
         this.getElement().classList.remove(`card--${it}`);
       });
-
-      switch (evt.target.htmlFor) {
-        case `color-black-4`:
-          this.getElement().classList.add(`card--black`);
-          break;
-        case `color-yellow-4`:
-          this.getElement().classList.add(`card--yellow`);
-          break;
-        case `color-blue-4`:
-          this.getElement().classList.add(`card--blue`);
-          break;
-        case `color-green-4`:
-          this.getElement().classList.add(`card--green`);
-          break;
-        case `color-pink-4`:
-          this.getElement().classList.add(`card--pink`);
-          break;
-      }
+      this.getElement().classList.add(`card--${evt.target.value}`);
     };
 
-    this.getElement().querySelector(`.card__colors-wrap`).addEventListener(`click`, onColorClick);
+    colorInputs.forEach((color) => {
+      color.addEventListener(`change`, onColorChange);
+    });
   }
 
   _hashtagInit() {
@@ -236,6 +221,7 @@ const getDateMarkup = (date) => date === null ? `` : `
       name="date"
       value="${formatDate(date)} ${formatTime(date)}"
     />
+    <time class ="card__datetime" datetime="${date}">
   </label>
 `;
 
