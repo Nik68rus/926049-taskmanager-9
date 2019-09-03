@@ -1,6 +1,6 @@
 import {makeMarkupGenerator} from '../util/dom';
 import AbstractComponent from './abstarct-component';
-import {formatDate, formatTime} from './card-date';
+import moment from 'moment';
 import {COLORS} from '../mock';
 import {checkDeadline, checkRepeat} from '../util/task-utils';
 import {isEnterKey} from '../util/predicates';
@@ -33,7 +33,10 @@ export default class TaskEdit extends AbstractComponent {
   }
 
   _dateInit() {
-    const onDateClick = () => {
+    const date = this.getElement().querySelector(`.card__date`);
+    let dateTime = this.getElement().querySelector(`.card__datetime`);
+
+    const onDateToggleClick = () => {
       const status = this.getElement().querySelector(`.card__date-status`);
       const deadline = this.getElement().querySelector(`.card__date-deadline`);
       if (status.textContent === `yes`) {
@@ -42,7 +45,18 @@ export default class TaskEdit extends AbstractComponent {
       this._changeStatus(deadline, status);
     };
 
-    this.getElement().querySelector(`.card__date-deadline-toggle`).addEventListener(`click`, onDateClick);
+    const onDateChange = () => {
+      dateTime.dateTime = date.value;
+      date.value = moment(dateTime.dateTime).format(`MMMM D h:mm A`).toUpperCase();
+      if (new Date(dateTime.dateTime) > Date.now()) {
+        this.getElement().classList.remove(`card--deadline`);
+      } else {
+        this.getElement().classList.add(`card--deadline`);
+      }
+    };
+
+    date.addEventListener(`change`, onDateChange);
+    this.getElement().querySelector(`.card__date-deadline-toggle`).addEventListener(`click`, onDateToggleClick);
   }
 
   _repeatInit() {
@@ -219,7 +233,7 @@ const getDateMarkup = (date) => date === null ? `` : `
       type="text"
       placeholder=""
       name="date"
-      value="${formatDate(date)} ${formatTime(date)}"
+      value="${moment(date).format(`D MMMM h:mm a`).toUpperCase()}"
     />
     <time class ="card__datetime" datetime="${date}">
   </label>

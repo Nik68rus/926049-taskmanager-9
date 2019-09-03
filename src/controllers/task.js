@@ -5,6 +5,10 @@ import {
 
 import {isEscapeKey} from '../util/predicates';
 import {render, Position} from '../util/dom';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import 'flatpickr/dist/themes/light.css';
+import moment from 'moment';
 
 export default class TaskController {
   constructor(container, task, onDataChange, onChangeView) {
@@ -25,6 +29,9 @@ export default class TaskController {
 
   _init() {
     const description = this._taskEdit.getElement().querySelector(`textarea`);
+    const date = this._taskEdit.getElement().querySelector(`.card__date`);
+    let dateTime = this._taskEdit.getElement().querySelector(`.card__datetime`);
+
     const onEscKeyDown = (evt) => {
       if (isEscapeKey(evt)) {
         this._taskEdit.getElement().querySelector(`.card__form`).reset();
@@ -36,6 +43,15 @@ export default class TaskController {
     this._taskView.getElement()
       .querySelector(`.card__btn--edit`)
       .addEventListener(`click`, (evt) => {
+
+        flatpickr(date, {
+          allowInput: true,
+          enableTime: true,
+          defaultDate: this._task.dueDate,
+        });
+
+        date.value = moment(new Date(dateTime.dateTime)).format(`MMMM D h:mm A`).toUpperCase();
+
         evt.preventDefault();
         this._onChangeView();
         this._container.getElement().replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
@@ -57,12 +73,12 @@ export default class TaskController {
       .addEventListener(`click`, (evt) => {
         evt.preventDefault();
         const formData = new FormData(this._taskEdit.getElement().querySelector(`.card__form`));
-        const date = this._taskEdit.getElement().querySelector(`.card__datetime`).dateTime;
+
         const entry = {
           description: formData.get(`text`),
           color: formData.get(`color`),
           tags: new Set(formData.getAll(`hashtag`)),
-          dueDate: formData.get(`date`) ? new Date(date) : null,
+          dueDate: formData.get(`date`) ? new Date(dateTime.dateTime) : null,
           repeatingDays: formData.getAll(`repeat`).reduce((acc, it) => {
             acc[it] = true;
             return acc;
