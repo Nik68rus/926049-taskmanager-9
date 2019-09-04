@@ -9,11 +9,13 @@ import {
 import {render, unrender, Position} from '../util/dom';
 import {TASK_LOAD_NUM} from '../mock';
 import TaskController from './task';
+import {Mode} from '../constants';
 
 export default class BoardController {
   constructor(container, tasks) {
     this._container = container;
     this._tasks = tasks;
+    this._creatingTask = null;
     this._sortedTasks = tasks;
     this._loadedTasks = TASK_LOAD_NUM;
     this._board = new Board();
@@ -41,6 +43,39 @@ export default class BoardController {
     }
   }
 
+  hide() {
+    this._board.getElement().classList.add(`visually-hidden`);
+  }
+
+  show() {
+    this._board.getElement().classList.remove(`visually-hidden`);
+  }
+
+  createTask() {
+    const defaultTask = {
+      description: ``,
+      dueDate: new Date(),
+      tags: new Set(),
+      color: [],
+      repeatingDays: {
+        'mo': false,
+        'tu': false,
+        'we': false,
+        'th': false,
+        'fr': false,
+        'sa': false,
+        'su': false,
+      },
+      isFavorite: false,
+      isArchive: false,
+    };
+
+    if (this._creatingTask) {
+      return;
+    }
+    this._creatingTask = new TaskController(this._taskList, defaultTask, Mode.ADDING, this._onDataChange, this._onChangeView);
+  }
+
   _renderBoard() {
     unrender(this._taskList.getElement());
     this._taskList.removeElement();
@@ -53,13 +88,28 @@ export default class BoardController {
   }
 
   _renderTask(task) {
-    const taskController = new TaskController(this._taskList, task, this._onDataChange, this._onChangeView);
+    const taskController = new TaskController(this._taskList, task, Mode.DEFAULT, this._onDataChange, this._onChangeView);
     this._subscriptions.push(taskController.setDefaultView.bind(taskController));
   }
 
   _onDataChange(newData, oldData) {
-    this._tasks[this._tasks.findIndex((it) => it === oldData)] = newData;
-    this._sortedTasks[this._sortedTasks.findIndex((it) => it === oldData)] = newData;
+    const index = this._tasks.findIndex((it) => it === oldData);
+    const sortIndex = this._sortedTasks.findIndex((it) => it === oldData);
+
+    if (newData === null) {
+      this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];
+      this._sortedTasks = [...this._sortedTasks.slice(0, sortIndex), ...this._sortedTasks.slice(sortIndex + 1)];
+    } else {
+      if (oldData === null) {
+        this._creatingTask = null;
+        this._tasks = [newData, ...this._tasks];
+        this._sortedTasks = [newData, ...this._sortedTasks];
+      } else {
+        this._tasks[index] = newData;
+        this._sortedTasks[sortIndex] = newData;
+      }
+    }
+
     this._renderBoard();
   }
 

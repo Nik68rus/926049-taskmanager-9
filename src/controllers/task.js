@@ -5,20 +5,21 @@ import {
 
 import {isEscapeKey} from '../util/predicates';
 import {render, Position} from '../util/dom';
+import {Mode} from '../constants';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';
 import moment from 'moment';
 
 export default class TaskController {
-  constructor(container, task, onDataChange, onChangeView) {
+  constructor(container, task, mode, onDataChange, onChangeView) {
     this._container = container;
     this._task = task;
     this._onDataChange = onDataChange;
     this._onChangeView = onChangeView;
     this._taskView = new Task(task);
     this._taskEdit = new TaskEdit(task);
-    this._init();
+    this._init(mode);
   }
 
   setDefaultView() {
@@ -27,15 +28,32 @@ export default class TaskController {
     }
   }
 
-  _init() {
+  _init(mode) {
     const description = this._taskEdit.getElement().querySelector(`textarea`);
     const date = this._taskEdit.getElement().querySelector(`.card__date`);
     let dateTime = this._taskEdit.getElement().querySelector(`.card__datetime`);
+    let renderPosition = Position.BEFOREEND;
+    let currentView = this._taskView;
+
+    if (mode === Mode.ADDING) {
+      renderPosition = Position.AFTERBEGIN;
+      currentView = this._taskEdit;
+    }
+
+    flatpickr(date, {
+      allowInput: true,
+      enableTime: true,
+      defaultDate: this._task.dueDate,
+    });
 
     const onEscKeyDown = (evt) => {
       if (isEscapeKey(evt)) {
-        this._taskEdit.getElement().querySelector(`.card__form`).reset();
-        this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
+        if (mode === Mode.DEFAULT) {
+          this._taskEdit.getElement().querySelector(`.card__form`).reset();
+          this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
+        } else {
+          this._container.getElement().removeChild(this._taskEdit.getElement());
+        }
         document.removeEventListener(`keydown`, onEscKeyDown);
       }
     };
@@ -43,13 +61,6 @@ export default class TaskController {
     this._taskView.getElement()
       .querySelector(`.card__btn--edit`)
       .addEventListener(`click`, (evt) => {
-
-        flatpickr(date, {
-          allowInput: true,
-          enableTime: true,
-          defaultDate: this._task.dueDate,
-        });
-
         date.value = moment(new Date(dateTime.dateTime)).format(`MMMM D h:mm A`).toUpperCase();
 
         evt.preventDefault();
@@ -94,13 +105,19 @@ export default class TaskController {
           isArchive: this._taskEdit.getElement().querySelector(`.card__btn--archive`).classList.contains(`card__btn--disabled`),
           isFavorite: this._taskEdit.getElement().querySelector(`.card__btn--favorites`).classList.contains(`card__btn--disabled`),
         };
-        this._onDataChange(entry, this._task);
+        this._onDataChange(entry, mode === Mode.DEFAULT ? this._task : null);
         document.removeEventListener(`keydown`, onEscKeyDown);
         this._taskEdit.getElement().querySelector(`.card__btn--archive`).removeEventListener(`click`, this._onArchiveBtnClick);
         this._taskEdit.getElement().querySelector(`.card__btn--favorites`).removeEventListener(`click`, this._onFavoritesBtnClick);
       });
 
-    render(this._container.getElement(), this._taskView.getElement(), Position.BEFOREEND);
+    this._taskEdit.getElement().querySelector(`.card__delete`)
+    .addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+      this._onDataChange(null, this._task);
+    });
+
+    render(this._container.getElement(), currentView.getElement(), renderPosition);
   }
 
   _makeOnCardBtnClickCB(button) {

@@ -12,3 +12,8 @@ export const Time = {
   WEEK: 7 * 24 * 60 * 60 * 1000,
 };
 
+export const Mode = {
+  ADDING: `adding`,
+  DEFAULT: `default`,
+};
+

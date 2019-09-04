@@ -3,6 +3,7 @@ import {
   SiteMenu,
   Filter,
   formatDate,
+  Statistic,
 } from './components';
 
 import BoardController from './controllers/board';
@@ -11,6 +12,7 @@ import {Mock, TASK_LOAD_NUM} from './mock';
 
 const menuContainer = document.querySelector(`.main__control`);
 const mainContainer = document.querySelector(`.main`);
+const statistics = new Statistic();
 
 const menuElements = [
   {name: `new-task`},
@@ -39,10 +41,35 @@ const renderMenuWrapper = () => {
   menuContainer.insertAdjacentHTML(Position.BEFOREEND, menuWrapper);
 };
 
+const onMenuChange = (evt) => {
+  evt.preventDefault();
+  if (evt.target.tagName.toLowerCase() !== `input`) {
+    return;
+  }
+  switch (evt.target.id) {
+    case `control__task`:
+      statistics.getElement().classList.add(`visually-hidden`);
+      boardController.show();
+      break;
+    case `control__statistic`:
+      boardController.hide();
+      statistics.getElement().classList.remove(`visually-hidden`);
+      break;
+    case `control__new-task`:
+      boardController.createTask();
+      // Вернем выделение на пункт меню TASKS
+      menuContainer.querySelector(`#control__task`).checked = true;
+      break;
+  }
+};
+
 const renderMenu = (menuItem) => {
   const menuWrapper = mainContainer.querySelector(`.control__btn-wrap`);
   const menu = new SiteMenu(menuItem);
   render(menuWrapper, menu.getElement(), Position.BEFOREEND);
+  menu.getElement()[0].addEventListener(`change`, (evt) => {
+    onMenuChange(evt);
+  });
 };
 
 const renderFilterWrapper = () => {
@@ -98,6 +125,8 @@ renderSearch();
 renderFilterWrapper();
 filters.forEach(renderFilter);
 updateFilters(getFilterElements(tasks));
+render(mainContainer, statistics.getElement(), Position.BEFOREEND);
+statistics.getElement().classList.add(`visually-hidden`);
 
 const boardController = new BoardController(mainContainer, tasks);
 boardController.init();
