@@ -29,16 +29,12 @@ export default class TaskController {
   }
 
   _init(mode) {
+    console.log(mode);
     const description = this._taskEdit.getElement().querySelector(`textarea`);
     const date = this._taskEdit.getElement().querySelector(`.card__date`);
     let dateTime = this._taskEdit.getElement().querySelector(`.card__datetime`);
     let renderPosition = Position.BEFOREEND;
     let currentView = this._taskView;
-
-    if (mode === Mode.ADDING) {
-      renderPosition = Position.AFTERBEGIN;
-      currentView = this._taskEdit;
-    }
 
     flatpickr(date, {
       allowInput: true,
@@ -48,15 +44,22 @@ export default class TaskController {
 
     const onEscKeyDown = (evt) => {
       if (isEscapeKey(evt)) {
-        if (mode === Mode.DEFAULT) {
+        if (mode === Mode.ADDING) {
+          this._container.getElement().removeChild(this._taskEdit.getElement());
+          this._onDataChange(null, null);
+        } else {
           this._taskEdit.getElement().querySelector(`.card__form`).reset();
           this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
-        } else {
-          this._container.getElement().removeChild(this._taskEdit.getElement());
         }
         document.removeEventListener(`keydown`, onEscKeyDown);
       }
     };
+
+    if (mode === Mode.ADDING) {
+      document.addEventListener(`keydown`, onEscKeyDown);
+      renderPosition = Position.AFTERBEGIN;
+      currentView = this._taskEdit;
+    }
 
     this._taskView.getElement()
       .querySelector(`.card__btn--edit`)

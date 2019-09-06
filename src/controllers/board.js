@@ -70,6 +70,8 @@ export default class BoardController {
       isArchive: false,
     };
 
+    console.log(`new`);
+
     if (this._creatingTask) {
       return;
     }
@@ -99,6 +101,9 @@ export default class BoardController {
     if (newData === null) {
       this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];
       this._sortedTasks = [...this._sortedTasks.slice(0, sortIndex), ...this._sortedTasks.slice(sortIndex + 1)];
+      if (oldData === null) {
+        this._creatingTask = null;
+      }
     } else {
       if (oldData === null) {
         this._creatingTask = null;
