@@ -9,14 +9,14 @@ import {
 import {render, unrender, Position} from '../util/dom';
 import {TASK_LOAD_NUM} from '../mock';
 import TaskController from './task';
-import {Mode} from '../constants';
+import {Mode, SortType} from '../constants';
 
 export default class BoardController {
   constructor(container, tasks) {
     this._container = container;
     this._tasks = tasks;
     this._creatingTask = null;
-    this._sortedTasks = tasks;
+    this._sortType = SortType.DEFAULT;
     this._loadedTasks = TASK_LOAD_NUM;
     this._board = new Board();
     this._taskList = new TaskList();
@@ -70,8 +70,6 @@ export default class BoardController {
       isArchive: false,
     };
 
-    console.log(`new`);
-
     if (this._creatingTask) {
       return;
     }
@@ -83,7 +81,7 @@ export default class BoardController {
     this._taskList.removeElement();
     render(this._board.getElement(), this._taskList.getElement(), Position.BEFOREEND);
 
-    this._sortedTasks.slice(0, this._loadedTasks).forEach((task) => this._renderTask(task));
+    this._getSortedTasks().slice(0, this._loadedTasks).forEach((task) => this._renderTask(task));
     render(this._board.getElement(), this._loadButton.getElement(), Position.BEFOREEND);
     this._loadButton.getElement().addEventListener(`click`, this._onLoadButtonClick);
     this._sorting.getElement().addEventListener(`click`, (evt) => this._onSortLinkClick(evt));
@@ -96,11 +94,9 @@ export default class BoardController {
 
   _onDataChange(newData, oldData) {
     const index = this._tasks.findIndex((it) => it === oldData);
-    const sortIndex = this._sortedTasks.findIndex((it) => it === oldData);
 
     if (newData === null) {
       this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];
-      this._sortedTasks = [...this._sortedTasks.slice(0, sortIndex), ...this._sortedTasks.slice(sortIndex + 1)];
       if (oldData === null) {
         this._creatingTask = null;
       }
@@ -108,10 +104,8 @@ export default class BoardController {
       if (oldData === null) {
         this._creatingTask = null;
         this._tasks = [newData, ...this._tasks];
-        this._sortedTasks = [newData, ...this._sortedTasks];
       } else {
         this._tasks[index] = newData;
-        this._sortedTasks[sortIndex] = newData;
       }
     }
 
@@ -123,7 +117,7 @@ export default class BoardController {
   }
 
   _onLoadButtonClick() {
-    const renderingTasks = this._sortedTasks.slice(this._loadedTasks, this._loadedTasks + TASK_LOAD_NUM);
+    const renderingTasks = this._getSortedTasks().slice(this._loadedTasks, this._loadedTasks + TASK_LOAD_NUM);
     this._loadedTasks += TASK_LOAD_NUM;
     renderingTasks.forEach((task) => this._renderTask(task));
     if (renderingTasks.length < TASK_LOAD_NUM) {
@@ -140,19 +134,23 @@ export default class BoardController {
     }
 
     this._taskList.getElement().innerHTML = ``;
+    this._sortType = evt.target.dataset.sortType;
+    this._getSortedTasks().slice(0, this._loadedTasks).forEach((task) => this._renderTask(task));
+  }
 
-    switch (evt.target.dataset.sortType) {
-      case `date-up`:
-        this._sortedTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+  _getSortedTasks() {
+    let currentTasks = [];
+    switch (this._sortType) {
+      case SortType.DATE_UP:
+        currentTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
         break;
-      case `date-down`:
-        this._sortedTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+      case SortType.DATE_DOWN:
+        currentTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
         break;
-      case `default`:
-        this._sortedTasks = this._tasks;
-        break;
+      case SortType.DEFAULT:
+        currentTasks = this._tasks;
     }
-    this._sortedTasks.slice(0, this._loadedTasks).forEach((task) => this._renderTask(task));
+    return currentTasks;
   }
 }
 

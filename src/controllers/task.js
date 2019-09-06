@@ -29,7 +29,6 @@ export default class TaskController {
   }
 
   _init(mode) {
-    console.log(mode);
     const description = this._taskEdit.getElement().querySelector(`textarea`);
     const date = this._taskEdit.getElement().querySelector(`.card__date`);
     let dateTime = this._taskEdit.getElement().querySelector(`.card__datetime`);
