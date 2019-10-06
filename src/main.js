@@ -4,6 +4,7 @@ import {
   Filter,
   formatDate,
   Statistic,
+  API,
 } from './components';
 
 import BoardController from './controllers/board';
@@ -13,6 +14,15 @@ import {Mock, TASK_LOAD_NUM} from './mock';
 const menuContainer = document.querySelector(`.main__control`);
 const mainContainer = document.querySelector(`.main`);
 const statistics = new Statistic();
+
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
+const END_POINT = `https://htmlacademy-es-9.appspot.com/task-manager`;
+const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+
+console.log(api.getTasks());
+
+const onDataChange = () => {};
+
 
 const menuElements = [
   {name: `new-task`},
@@ -129,4 +139,5 @@ render(mainContainer, statistics.getElement(), Position.BEFOREEND);
 statistics.getElement().classList.add(`visually-hidden`);
 
 const boardController = new BoardController(mainContainer, tasks);
-boardController.init();
+api.getTasks().then((tasks) => boardController.init(tasks));
+//boardController.init(tasks);

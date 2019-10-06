@@ -31,10 +31,10 @@ export default class BoardController {
 
   }
 
-  init() {
+  init(tasks) {
     const boardElement = this._board.getElement();
     render(this._container, boardElement, Position.BEFOREEND);
-
+    this._tasks = tasks;
     if (this._tasks.every(({isArchive}) => isArchive)) {
       render(boardElement, this._boardEmpty.getElement(), Position.AFTERBEGIN);
     } else {
@@ -96,9 +96,10 @@ export default class BoardController {
     const index = this._tasks.findIndex((it) => it === oldData);
 
     if (newData === null) {
-      this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];
       if (oldData === null) {
         this._creatingTask = null;
+      } else {
+        this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];
       }
     } else {
       if (oldData === null) {
