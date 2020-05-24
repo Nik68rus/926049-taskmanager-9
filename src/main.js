@@ -6,6 +6,7 @@ import { getSortingMarkup } from './components/sorting';
 import { getTaskMarkup } from './components/task';
 import { getEditFormMarkup } from './components/task-edit';
 import { getLoadBtnMarkup } from './components/load-more-button';
+import { Mock } from './mock';
 
 const menuContainer = document.querySelector(`.main__control`);
 const mainContainer = document.querySelector(`.main`);
@@ -23,8 +24,9 @@ const boardContainer = document.querySelector(`.board`);
 const cardsContainer = document.querySelector(`.board__tasks`);
 
 renderComponent(boardContainer, getSortingMarkup(), `afterbegin`);
-renderComponent(cardsContainer, getEditFormMarkup(), `afterbegin`);
 
-new Array(3).fill(``).forEach(() => renderComponent(cardsContainer, getTaskMarkup(), `beforeend`));
-
+const tasks = Mock.load();
+renderComponent(cardsContainer, getEditFormMarkup(tasks[0]), `afterbegin`);
+tasks.slice(1, 8).forEach((task) => renderComponent(cardsContainer, getTaskMarkup(task), `beforeend`));
 renderComponent(boardContainer, getLoadBtnMarkup(), `beforeend`);
+

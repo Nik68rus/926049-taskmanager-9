@@ -1,15 +1,84 @@
-export const getEditFormMarkup = () => {
+import { checkRepeats, checkDeadline } from './task';
+import { COLORS } from '../mock';
+
+const getTag = (tag) => {
+  return `
+  <span class="card__hashtag-inner">
+    <input
+      type="hidden"
+      name="hashtag"
+      value="${tag}"
+      class="card__hashtag-hidden-input"
+    />
+    <p class="card__hashtag-name">
+      #${tag}
+    </p>
+    <button type="button" class="card__hashtag-delete">
+      delete
+    </button>
+  </span>
+  `;
+};
+
+const getHashTagsMarkup = (tags, render) => {
+  return `
+  <div class="card__hashtag">
+    <div class="card__hashtag-list">
+      ${tags.map((tag) => render(tag)).join(`\n`)}
+    </div>
+
+    <label>
+      <input
+        type="text"
+        class="card__hashtag-input"
+        name="hashtag-input"
+        placeholder="Type new hashtag here"
+      />
+    </label>
+  </div>
+  `;
+};
+
+const getColorChooser = (clr, curClr) => {
+  return `
+  <input
+    type="radio"
+    id="color-${clr}-4"
+    class="card__color-input card__color-input--${clr} visually-hidden"
+    name="color"
+    value="${clr}"
+    ${clr === curClr ? `checked` : ``}
+  />
+  <label
+    for="color-${clr}-4"
+    class="card__color card__color--${clr}"
+    >${clr}</label
+  >
+  `;
+};
+
+const getColorChooserMarkup = (colors, curColor) => {
+  return `
+  <div class="card__colors-inner">
+    <h3 class="card__colors-title">Color</h3>
+    <div class="card__colors-wrap">
+      ${colors.map((color) => getColorChooser(color, curColor)).join(`\n`)}
+    </div>
+  </div>`;
+};
+
+export const getEditFormMarkup = ({ description, dueDate, repeatingDays, tags, color, isFavorite, isArchive }) => {
   return (`
-    <article class="card card--edit card--yellow card--repeat">
+    <article class="card card--edit card--${color} ${checkRepeats(repeatingDays)} ${checkDeadline(dueDate)}">
     <form class="card__form" method="get">
       <div class="card__inner">
         <div class="card__control">
-          <button type="button" class="card__btn card__btn--archive">
+          <button type="button" class="card__btn card__btn--archive ${isArchive ? `card__btn--disabled` : ``}">
             archive
           </button>
           <button
             type="button"
-            class="card__btn card__btn--favorites card__btn--disabled"
+            class="card__btn card__btn--favorites ${isFavorite ? `card__btn--disabled` : ``}"
           >
             favorites
           </button>
@@ -27,7 +96,7 @@ export const getEditFormMarkup = () => {
               class="card__text"
               placeholder="Start typing your text here..."
               name="text"
-            >Here is a card with filled data</textarea>
+            >${description}</textarea>
           </label>
         </div>
 
@@ -45,7 +114,7 @@ export const getEditFormMarkup = () => {
                     type="text"
                     placeholder=""
                     name="date"
-                    value="23 September 11:15 PM"
+                    value="${new Date(dueDate)}"
                   />
                 </label>
               </fieldset>
@@ -133,131 +202,12 @@ export const getEditFormMarkup = () => {
               </fieldset>
             </div>
 
-            <div class="card__hashtag">
-              <div class="card__hashtag-list">
-                <span class="card__hashtag-inner">
-                  <input
-                    type="hidden"
-                    name="hashtag"
-                    value="repeat"
-                    class="card__hashtag-hidden-input"
-                  />
-                  <p class="card__hashtag-name">
-                    #repeat
-                  </p>
-                  <button type="button" class="card__hashtag-delete">
-                    delete
-                  </button>
-                </span>
+            ${getHashTagsMarkup(tags, getTag)}
 
-                <span class="card__hashtag-inner">
-                  <input
-                    type="hidden"
-                    name="hashtag"
-                    value="repeat"
-                    class="card__hashtag-hidden-input"
-                  />
-                  <p class="card__hashtag-name">
-                    #cinema
-                  </p>
-                  <button type="button" class="card__hashtag-delete">
-                    delete
-                  </button>
-                </span>
-
-                <span class="card__hashtag-inner">
-                  <input
-                    type="hidden"
-                    name="hashtag"
-                    value="repeat"
-                    class="card__hashtag-hidden-input"
-                  />
-                  <p class="card__hashtag-name">
-                    #entertaiment
-                  </p>
-                  <button type="button" class="card__hashtag-delete">
-                    delete
-                  </button>
-                </span>
-              </div>
-
-              <label>
-                <input
-                  type="text"
-                  class="card__hashtag-input"
-                  name="hashtag-input"
-                  placeholder="Type new hashtag here"
-                />
-              </label>
-            </div>
           </div>
 
-          <div class="card__colors-inner">
-            <h3 class="card__colors-title">Color</h3>
-            <div class="card__colors-wrap">
-              <input
-                type="radio"
-                id="color-black-4"
-                class="card__color-input card__color-input--black visually-hidden"
-                name="color"
-                value="black"
-              />
-              <label
-                for="color-black-4"
-                class="card__color card__color--black"
-                >black</label
-              >
-              <input
-                type="radio"
-                id="color-yellow-4"
-                class="card__color-input card__color-input--yellow visually-hidden"
-                name="color"
-                value="yellow"
-                checked
-              />
-              <label
-                for="color-yellow-4"
-                class="card__color card__color--yellow"
-                >yellow</label
-              >
-              <input
-                type="radio"
-                id="color-blue-4"
-                class="card__color-input card__color-input--blue visually-hidden"
-                name="color"
-                value="blue"
-              />
-              <label
-                for="color-blue-4"
-                class="card__color card__color--blue"
-                >blue</label
-              >
-              <input
-                type="radio"
-                id="color-green-4"
-                class="card__color-input card__color-input--green visually-hidden"
-                name="color"
-                value="green"
-              />
-              <label
-                for="color-green-4"
-                class="card__color card__color--green"
-                >green</label
-              >
-              <input
-                type="radio"
-                id="color-pink-4"
-                class="card__color-input card__color-input--pink visually-hidden"
-                name="color"
-                value="pink"
-              />
-              <label
-                for="color-pink-4"
-                class="card__color card__color--pink"
-                >pink</label
-              >
-            </div>
-          </div>
+          ${getColorChooserMarkup(COLORS, color)}
+
         </div>
 
         <div class="card__status-btns">
