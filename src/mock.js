@@ -1,5 +1,6 @@
 import { TaskDay, Time } from './constants';
 const TASK_NUM = 22;
+export const TASK_LOAD_NUM = 8;
 const MAX_TAGS_NUM = 3;
 const TAGS = [`homework`, `theory`, `practice`, `intensive`, `keks`];
 const DESCRIPTIONS = [

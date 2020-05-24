@@ -1,73 +1,46 @@
-export const getFiltersMarkup = () => {
+const getTaskCount = (tasks, cb) => tasks.filter(cb).length;
+
+const checkFilterOverdue = (task) => task.dueDate < Date.now();
+const checkFilterToday = (task) => {
+  const taskDate = new Date(task.dueDate);
+  const today = new Date(Date.now());
+  return taskDate.getYear() === today.getYear() && taskDate.getMonth() === today.getMonth() && taskDate.getDate() === today.getDate();
+};
+const checkFilterFavorites = (task) => task.isFavorite;
+const checkFilterArchive = (task) => task.isArchive;
+const checkFilterTags = (task) => task.length > 0;
+const checkFilterRepeating = (task) => Object.keys(task.repeatingDays).some((day) => task.repeatingDays[day]);
+
+export const getFiltersData = (tasks) => [
+  { title: `all`, count: tasks.length, isChecked: true },
+  { title: `overdue`, count: getTaskCount(tasks, checkFilterOverdue) },
+  { title: `today`, count: getTaskCount(tasks, checkFilterToday) },
+  { title: `favorites`, count: getTaskCount(tasks, checkFilterFavorites) },
+  { title: `repeating`, count: getTaskCount(tasks, checkFilterRepeating) },
+  { title: `tags`, count: getTaskCount(tasks, checkFilterTags) },
+  { title: `archive`, count: getTaskCount(tasks, checkFilterArchive) },
+];
+
+const getFilterMarkup = ({ title, count = 0, isChecked = false }) => {
+  const id = title.toLowerCase();
+  return `
+  <input
+    type="radio"
+    id="filter__${id}"
+    class="filter__input visually-hidden"
+    name="filter"
+    ${isChecked ? `checked` : ``}
+  />
+  <label for="filter__all" class="filter__label">
+    ${title} <span class="filter__${id}-count">${count}</span></label
+  >
+  `.trim();
+};
+
+export const getFiltersMarkup = (filters) => {
   return (`
     <section class="main__filter filter container">
-      <input
-        type="radio"
-        id="filter__all"
-        class="filter__input visually-hidden"
-        name="filter"
-        checked
-      />
-      <label for="filter__all" class="filter__label">
-        All <span class="filter__all-count">13</span></label
-      >
-      <input
-        type="radio"
-        id="filter__overdue"
-        class="filter__input visually-hidden"
-        name="filter"
-        disabled
-      />
-      <label for="filter__overdue" class="filter__label"
-        >Overdue <span class="filter__overdue-count">0</span></label
-      >
-      <input
-        type="radio"
-        id="filter__today"
-        class="filter__input visually-hidden"
-        name="filter"
-        disabled
-      />
-      <label for="filter__today" class="filter__label"
-        >Today <span class="filter__today-count">0</span></label
-      >
-      <input
-        type="radio"
-        id="filter__favorites"
-        class="filter__input visually-hidden"
-        name="filter"
-      />
-      <label for="filter__favorites" class="filter__label"
-        >Favorites <span class="filter__favorites-count">1</span></label
-      >
-      <input
-        type="radio"
-        id="filter__repeating"
-        class="filter__input visually-hidden"
-        name="filter"
-      />
-      <label for="filter__repeating" class="filter__label"
-        >Repeating <span class="filter__repeating-count">1</span></label
-      >
-      <input
-        type="radio"
-        id="filter__tags"
-        class="filter__input visually-hidden"
-        name="filter"
-      />
-      <label for="filter__tags" class="filter__label"
-        >Tags <span class="filter__tags-count">1</span></label
-      >
-      <input
-        type="radio"
-        id="filter__archive"
-        class="filter__input visually-hidden"
-        name="filter"
-      />
-      <label for="filter__archive" class="filter__label"
-        >Archive <span class="filter__archive-count">115</span></label
-      >
+      ${filters.map((filter) => getFilterMarkup(filter)).join(`\n`)}
     </section>
-
   `);
 };
