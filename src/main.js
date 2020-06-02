@@ -1,34 +1,117 @@
-import { getMenuMarkup } from './components/site-menu';
-import { getSearchMarkup } from './components/search';
-import { getFiltersMarkup, getFiltersData } from './components/filter';
-import { getBoardMarkup } from './components/board';
-import { getSortingMarkup } from './components/sorting';
-import { getTaskMarkup } from './components/task';
-import { getEditFormMarkup } from './components/task-edit';
-import { getLoadBtnMarkup } from './components/load-more-button';
 import { Mock, TASK_LOAD_NUM } from './mock';
+import { Position } from './constants';
+
+import {
+  Search,
+  TaskEdit,
+  Board,
+  Sorting,
+  LoadButton,
+  Task,
+  SiteMenu,
+  Filter,
+} from './components';
+
+import { render } from './utils/utils';
 
 const menuContainer = document.querySelector(`.main__control`);
 const mainContainer = document.querySelector(`.main`);
+const tasks = Mock.load();
+let loadedTasks = tasks.slice(0, TASK_LOAD_NUM);
 
-const renderComponent = (container, component, position) => {
-  container.insertAdjacentHTML(position, component);
+const renderMenuWrapper = (container) => {
+  const menuWrapper = `<section class="control__btn-wrap">
+    </section>`;
+  container.insertAdjacentHTML(Position.BEFOREEND, menuWrapper);
 };
 
-const tasks = Mock.load();
-const loadedTasks = tasks.slice(0, TASK_LOAD_NUM);
+const renderMenu = (container, menuItem) => {
+  const menu = new SiteMenu(menuItem);
+  render(container, menu.getElement(), Position.BEFOREEND);
+};
 
-renderComponent(menuContainer, getMenuMarkup(), `beforeend`);
-renderComponent(mainContainer, getSearchMarkup(), `beforeend`);
-renderComponent(mainContainer, getFiltersMarkup(getFiltersData(loadedTasks)), `beforeend`);
-renderComponent(mainContainer, getBoardMarkup(), `beforeend`);
+const renderFilterWrapper = (container) => {
+  const filterWrapper = `
+    <section class="main__filter filter container">
+    </section>
+  `;
+  container.insertAdjacentHTML(Position.BEFOREEND, filterWrapper);
+};
 
+const renderFilter = (container, filterItem) => {
+  const filter = new Filter(filterItem);
+  render(container, filter.getElement(), Position.BEFOREEND);
+};
+
+const renderSearch = (container) => {
+  const search = new Search();
+  render(container, search.getElement(), Position.BEFOREEND);
+};
+
+const renderBoard = (container) => {
+  const board = new Board();
+  render(container, board.getElement(), Position.BEFOREEND);
+};
+
+const renderSorting = (container) => {
+  const sorting = new Sorting();
+  render(container, sorting.getElement(), Position.AFTERBEGIN);
+};
+
+renderMenuWrapper(menuContainer);
+
+const menuWrapper = document.querySelector(`.control__btn-wrap`);
+Mock.menu.forEach((item) => renderMenu(menuWrapper, item));
+
+renderSearch(mainContainer);
+
+renderFilterWrapper(mainContainer);
+const filterContainer = document.querySelector(`.filter`);
+Mock.filters(tasks).forEach((filter) => renderFilter(filterContainer, filter));
+renderBoard(mainContainer);
+const taskBoard = document.querySelector(`.board__tasks`);
 const boardContainer = document.querySelector(`.board`);
-const cardsContainer = document.querySelector(`.board__tasks`);
+renderSorting(boardContainer);
 
-renderComponent(boardContainer, getSortingMarkup(), `afterbegin`);
 
-renderComponent(cardsContainer, getEditFormMarkup(loadedTasks[0]), `afterbegin`);
-loadedTasks.slice(1, 8).forEach((task) => renderComponent(cardsContainer, getTaskMarkup(task), `beforeend`));
-renderComponent(boardContainer, getLoadBtnMarkup(), `beforeend`);
+const renderTask = (container, taskMock) => {
+  const task = new Task(taskMock);
+  const taskEdit = new TaskEdit(taskMock);
 
+  const onEscKeyDown = (evt) => {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      container.replaceChild(task.getElement(), taskEdit.getElement());
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
+
+  task.getElement().querySelector(`.card__btn--edit`).addEventListener(`click`, () => {
+    container.replaceChild(taskEdit.getElement(), task.getElement());
+    document.addEventListener(`keydown`, onEscKeyDown);
+  });
+
+  render(container, task.getElement(), Position.BEFOREEND);
+};
+
+const renderLoadBtn = (container) => {
+  const btn = new LoadButton();
+  render(container, btn.getElement(), Position.BEFOREEND);
+};
+
+
+loadedTasks.forEach((taskMock) => renderTask(taskBoard, taskMock));
+renderLoadBtn(boardContainer);
+
+const loadMoreButton = document.querySelector(`.load-more`);
+
+const onLoadMoreButtonClick = () => {
+  const renderingTasks = tasks.slice(loadedTasks.length, loadedTasks.length + TASK_LOAD_NUM);
+  renderingTasks.forEach((task) => renderTask(taskBoard, task));
+  loadedTasks = loadedTasks.concat(renderingTasks);
+  if (renderingTasks.length < TASK_LOAD_NUM) {
+    loadMoreButton.style.display = `none`;
+    loadMoreButton.removeEventListener(`click`, onLoadMoreButtonClick);
+  }
+};
+
+loadMoreButton.addEventListener(`click`, onLoadMoreButtonClick);

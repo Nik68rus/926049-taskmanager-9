@@ -1,32 +1,39 @@
-export const getMenuMarkup = () => {
-  return (`
-    <section class="control__btn-wrap">
+import { createFewElements } from '../utils/utils';
+
+export class SiteMenu {
+  constructor({ name, isChecked }) {
+    this._name = name;
+    this._isChecked = isChecked;
+    this._element = null;
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createFewElements(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    const id = this._name.toLowerCase();
+    const menuName = this._name.toUpperCase() + `S`;
+    return `
       <input
         type="radio"
         name="control"
-        id="control__new-task"
+        id="control__${id}"
         class="control__input visually-hidden"
+        ${this._isChecked ? `checked` : ``}
       />
-      <label for="control__new-task" class="control__label control__label--new-task"
-      >+ ADD NEW TASK</label
-      >
-      <input
-        type="radio"
-        name="control"
-        id="control__task"
-        class="control__input visually-hidden"
-        checked
-      />
-      <label for="control__task" class="control__label">TASKS</label>
-      <input
-        type="radio"
-        name="control"
-        id="control__statistic"
-        class="control__input visually-hidden"
-      />
-      <label for="control__statistic" class="control__label"
-      >STATISTICS</label
-      >
-    </section>`
-  );
-};
+      <label
+        for="control__${id}"
+        class="control__label ${id === `new-task` ? `control__label--new-task` : ``}">
+      ${id === `new-task` ? `+ ADD NEW TASK` : menuName}
+      </label>
+    `.trim();
+  }
+}

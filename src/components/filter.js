@@ -1,46 +1,36 @@
-const getTaskCount = (tasks, cb) => tasks.filter(cb).length;
+import { createFewElements } from '../utils/utils';
 
-const checkFilterOverdue = (task) => task.dueDate < Date.now();
-const checkFilterToday = (task) => {
-  const taskDate = new Date(task.dueDate);
-  const today = new Date(Date.now());
-  return taskDate.getYear() === today.getYear() && taskDate.getMonth() === today.getMonth() && taskDate.getDate() === today.getDate();
-};
-const checkFilterFavorites = (task) => task.isFavorite;
-const checkFilterArchive = (task) => task.isArchive;
-const checkFilterTags = (task) => task.length > 0;
-const checkFilterRepeating = (task) => Object.keys(task.repeatingDays).some((day) => task.repeatingDays[day]);
+export class Filter {
+  constructor({ title, count, isChecked }) {
+    this._title = title;
+    this._count = count;
+    this._isChecked = isChecked;
+  }
 
-export const getFiltersData = (tasks) => [
-  { title: `all`, count: tasks.length, isChecked: true },
-  { title: `overdue`, count: getTaskCount(tasks, checkFilterOverdue) },
-  { title: `today`, count: getTaskCount(tasks, checkFilterToday) },
-  { title: `favorites`, count: getTaskCount(tasks, checkFilterFavorites) },
-  { title: `repeating`, count: getTaskCount(tasks, checkFilterRepeating) },
-  { title: `tags`, count: getTaskCount(tasks, checkFilterTags) },
-  { title: `archive`, count: getTaskCount(tasks, checkFilterArchive) },
-];
+  getElement() {
+    if (!this._element) {
+      this._element = createFewElements(this.getTemplate());
+    }
+    return this._element;
+  }
 
-const getFilterMarkup = ({ title, count = 0, isChecked = false }) => {
-  const id = title.toLowerCase();
-  return `
-  <input
-    type="radio"
-    id="filter__${id}"
-    class="filter__input visually-hidden"
-    name="filter"
-    ${isChecked ? `checked` : ``}
-  />
-  <label for="filter__all" class="filter__label">
-    ${title} <span class="filter__${id}-count">${count}</span></label
-  >
-  `.trim();
-};
+  removeElement() {
+    this._element = null;
+  }
 
-export const getFiltersMarkup = (filters) => {
-  return (`
-    <section class="main__filter filter container">
-      ${filters.map((filter) => getFilterMarkup(filter)).join(`\n`)}
-    </section>
-  `);
-};
+  getTemplate() {
+    const id = this._title.toLowerCase();
+    return `
+    <input
+      type="radio"
+      id="filter__${id}"
+      class="filter__input visually-hidden"
+      name="filter"
+      ${this._isChecked ? `checked` : ``}
+    />
+    <label for="filter__all" class="filter__label">
+      ${this._title} <span class="filter__${id}-count">${this._count}</span></label
+    >
+    `.trim();
+  }
+}
