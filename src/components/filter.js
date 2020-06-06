@@ -1,7 +1,9 @@
 import { createFewElements } from '../utils/utils';
+import AbstractComponent from './abstract-component';
 
-export class Filter {
+export default class Filter extends AbstractComponent {
   constructor({ title, count, isChecked }) {
+    super();
     this._title = title;
     this._count = count;
     this._isChecked = isChecked;
@@ -12,10 +14,6 @@ export class Filter {
       this._element = createFewElements(this.getTemplate());
     }
     return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 
   getTemplate() {

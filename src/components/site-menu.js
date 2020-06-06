@@ -1,21 +1,10 @@
-import { createFewElements } from '../utils/utils';
+import AbstractComponent from './abstract-component';
 
-export class SiteMenu {
+export default class SiteMenu extends AbstractComponent {
   constructor({ name, isChecked }) {
+    super();
     this._name = name;
     this._isChecked = isChecked;
-    this._element = null;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createFewElements(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 
   getTemplate() {

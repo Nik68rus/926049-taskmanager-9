@@ -1,21 +1,6 @@
-import { createElement } from '../utils/utils';
+import AbstractComponent from "./abstract-component";
 
-export class Sorting {
-  constructor() {
-    this._element = null;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
-
+export default class Sorting extends AbstractComponent {
   getTemplate() {
     return `
     <div class="board__filter-list">

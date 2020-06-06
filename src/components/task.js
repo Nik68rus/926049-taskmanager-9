@@ -1,8 +1,9 @@
 import { checkRepeat, checkDeadline } from '../utils/task-utils';
-import { createElement } from '../utils/utils';
+import AbstractComponent from './abstract-component';
 
-export class Task {
+export default class Task extends AbstractComponent {
   constructor({ description, dueDate, repeatingDays, tags, color, isFavorite, isArchive }) {
+    super();
     this._description = description;
     this._dueDate = dueDate;
     this._repeatingDays = repeatingDays;
@@ -10,18 +11,6 @@ export class Task {
     this._color = color;
     this._isFavorite = isFavorite;
     this._isArchive = isArchive;
-    this._element = null;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 
   getTemplate() {
