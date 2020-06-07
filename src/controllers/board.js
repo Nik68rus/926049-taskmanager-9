@@ -35,6 +35,7 @@ export default class BoardController {
       this._tasks.slice(0, TASK_LOAD_NUM).forEach((taskData) => this._renderTask(taskData));
       render(boardElement, this._loadMoreBtn.getElement(), Position.BEFOREEND);
       this._loadMoreBtn.getElement().addEventListener(`click`, this._onLoadButtonClick);
+      this._sorting.getElement().addEventListener(`click`, (evt) => this._onSortLinkClick(evt));
     }
   }
 
@@ -81,5 +82,28 @@ export default class BoardController {
       this._loadMoreBtn.getElement().style.display = `none`;
       this._loadMoreBtn.getElement().removeEventListener(`click`, this._onLoadButtonClick);
     }
+  }
+
+  _onSortLinkClick(evt) {
+    evt.preventDefault();
+
+    if (evt.target.tagName.toLowerCase() !== `a`) {
+      return;
+    }
+
+    this._taskList.getElement().innerHTML = ``;
+    switch (evt.target.dataset.sort) {
+      case `default`:
+        this._sortedTasks = this._tasks;
+        break;
+      case `date-down`:
+        this._sortedTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+        break;
+      case `date-up`:
+        this._sortedTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+        break;
+    }
+
+    this._sortedTasks.slice(0, this._loadedTasks).forEach((task) => this._renderTask(task));
   }
 }
