@@ -1,8 +1,11 @@
-import { checkRepeat, checkDeadline } from '../utils/task-utils';
-import { COLORS } from '../mock';
+import {checkRepeat, checkDeadline} from '../utils/task-utils';
+import {COLORS} from '../mock';
 import AbstractComponent from './abstract-component';
+import {render} from '../utils/utils';
+import Hashtag from './hashtag';
+import {Position} from '../constants';
 export default class TaskEdit extends AbstractComponent {
-  constructor({ description, dueDate, repeatingDays, tags, color, isFavorite, isArchive }) {
+  constructor({description, dueDate, repeatingDays, tags, color, isFavorite, isArchive}) {
     super();
     this._description = description;
     this._dueDate = dueDate;
@@ -11,6 +14,91 @@ export default class TaskEdit extends AbstractComponent {
     this._color = color;
     this._isFavorite = isFavorite;
     this._isArchive = isArchive;
+    this.init();
+  }
+
+  init() {
+    this._getTags(this._tags);
+    this._hashtagInit();
+    this._colorInit();
+    this._dateInit();
+    this._repeatInit();
+  }
+
+  _hashtagInit() {
+    const hashtagInput = this.getElement().querySelector(`.card__hashtag-input`);
+    hashtagInput.addEventListener(`keydown`, (evt) => {
+      if ((evt.key === `Enter`) && (evt.target.value !== ``)) {
+        evt.preventDefault();
+        const tag = new Hashtag(evt.target.value);
+        render(this.getElement().querySelector(`.card__hashtag-list`), tag.getElement(), Position.BEFOREEND);
+        hashtagInput.value = ``;
+      }
+    });
+  }
+
+  _colorInit() {
+    const colorInputs = this.getElement().querySelectorAll(`.card__color-input`);
+
+    const onColorChange = (evt) => {
+      COLORS.forEach((it) => {
+        this.getElement().classList.remove(`card--${it}`);
+      });
+      this.getElement().classList.add(`card--${evt.target.value}`);
+    };
+
+    colorInputs.forEach((color) => {
+      color.addEventListener(`change`, onColorChange);
+    });
+  }
+
+  _dateInit() {
+    const dateToggler = this.getElement().querySelector(`.card__date-deadline-toggle`);
+    const cardDate = this.getElement().querySelector(`.card__input-deadline-wrap`);
+    if (dateToggler) {
+      dateToggler.addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        const statusElement = dateToggler.querySelector(`.card__date-status`);
+        const status = statusElement.textContent.toLowerCase();
+        statusElement.textContent = (status === `yes`) ? `no` : `yes`;
+        cardDate.style.display = (status === `yes`) ? `none` : `flex`;
+      });
+    }
+  }
+
+  _repeatInit() {
+    const repeatToggler = this.getElement().querySelector(`.card__repeat-toggle`);
+    const repeatBlock = this.getElement().querySelector(`.card__repeat-days`);
+    const dayInputs = repeatBlock.querySelectorAll(`.card__repeat-day-input`);
+    if (repeatToggler && repeatBlock) {
+      const statusElement = repeatToggler.querySelector(`.card__repeat-status`);
+      let status = statusElement.textContent.toLowerCase();
+      repeatBlock.style.display = (status === `yes`) ? `block` : `none`;
+      repeatToggler.addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        status = statusElement.textContent.toLowerCase();
+        if (status === `yes`) {
+          this.getElement().classList.remove(`card--repeat`);
+          dayInputs.forEach((input) => {
+            input.checked = false;
+          }
+          );
+        } else {
+          this.getElement().classList.add(`card--repeat`);
+        }
+        statusElement.textContent = (status === `yes`) ? `no` : `yes`;
+        repeatBlock.style.display = (status === `yes`) ? `none` : `block`;
+        status = ``;
+      });
+    }
+  }
+
+  _getTags(tags) {
+    const hastagsList = this.getElement().querySelector(`.card__hashtag-list`);
+    tags.forEach((tag) => {
+      const tagElement = new Hashtag(tag);
+      render(hastagsList, tagElement.getElement(), Position.BEFOREEND);
+    });
   }
 
   getTemplate() {
@@ -73,7 +161,7 @@ export default class TaskEdit extends AbstractComponent {
 
               </div>
 
-              ${getHashTagsMarkup(this._tags, getTag)}
+              ${getHashTagsMarkup()}
 
             </div>
 
@@ -92,30 +180,10 @@ export default class TaskEdit extends AbstractComponent {
   }
 }
 
-const getTag = (tag) => {
-  return `
-  <span class="card__hashtag-inner">
-    <input
-      type="hidden"
-      name="hashtag"
-      value="${tag}"
-      class="card__hashtag-hidden-input"
-    />
-    <p class="card__hashtag-name">
-      #${tag}
-    </p>
-    <button type="button" class="card__hashtag-delete">
-      delete
-    </button>
-  </span>
-  `;
-};
-
-const getHashTagsMarkup = (tags, render) => {
+const getHashTagsMarkup = () => {
   return `
   <div class="card__hashtag">
     <div class="card__hashtag-list">
-      ${tags.map((tag) => render(tag)).join(`\n`)}
     </div>
 
     <label>

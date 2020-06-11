@@ -2,26 +2,30 @@ import {
   Board,
   TaskList,
   Sorting,
-  Task,
-  TaskEdit,
   BoardEmpty,
   LoadButton
 } from '../components';
-import { render } from '../utils/utils';
-import { Position } from '../constants';
-import { TASK_LOAD_NUM } from '../mock';
+import {render} from '../utils/utils';
+import {Position} from '../constants';
+import {TASK_LOAD_NUM} from '../mock';
+import TaskController from './task';
 
 export default class BoardController {
   constructor(container, tasks) {
     this._container = container;
     this._tasks = tasks;
+    this._sortedTasks = tasks;
     this._board = new Board();
     this._boardEmpty = new BoardEmpty();
     this._taskList = new TaskList();
     this._sorting = new Sorting();
     this._loadMoreBtn = new LoadButton();
     this._loadedTasks = TASK_LOAD_NUM;
+    this._subscriptions = [];
+
     this._onLoadButtonClick = this._onLoadButtonClick.bind(this);
+    this._onDataChange = this._onDataChange.bind(this);
+    this._onChangeView = this._onChangeView.bind(this);
   }
 
   init() {
@@ -32,7 +36,7 @@ export default class BoardController {
     } else {
       render(boardElement, this._sorting.getElement(), Position.AFTERBEGIN);
       render(boardElement, this._taskList.getElement(), Position.BEFOREEND);
-      this._tasks.slice(0, TASK_LOAD_NUM).forEach((taskData) => this._renderTask(taskData));
+      this._renderBoard(this._tasks);
       render(boardElement, this._loadMoreBtn.getElement(), Position.BEFOREEND);
       this._loadMoreBtn.getElement().addEventListener(`click`, this._onLoadButtonClick);
       this._sorting.getElement().addEventListener(`click`, (evt) => this._onSortLinkClick(evt));
@@ -40,38 +44,23 @@ export default class BoardController {
   }
 
   _renderTask(task) {
-    const taskComponent = new Task(task);
-    const taskEditComponent = new TaskEdit(task);
+    const taskController = new TaskController(this._taskList, task, this._onDataChange, this._onChangeView);
+    this._subscriptions.push(taskController.setDefaultView.bind(taskController));
+  }
 
-    const onEscKeyDown = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
-        this._taskList.getElement().replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      }
-    };
+  _renderBoard(tasks) {
+    this._taskList.getElement().innerHTML = ``;
+    tasks.slice(0, this._loadedTasks).forEach((task) => this._renderTask(task));
+  }
 
-    taskComponent.getElement().querySelector(`.card__btn--edit`).addEventListener(`click`, () => {
-      this._taskList.getElement().replaceChild(taskEditComponent.getElement(), taskComponent.getElement());
-      document.addEventListener(`keydown`, onEscKeyDown);
-    });
+  _onDataChange(newData, oldData) {
+    this._tasks[this._tasks.findIndex((it) => it === oldData)] = newData;
+    this._sortedTasks[this._sortedTasks.findIndex((it) => it === oldData)] = newData;
+    this._renderBoard(this._sortedTasks);
+  }
 
-    taskEditComponent.getElement().querySelector(`textarea`)
-      .addEventListener(`focus`, () => {
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      });
-
-    taskEditComponent.getElement().querySelector(`textarea`)
-      .addEventListener(`blur`, () => {
-        document.addEventListener(`keydown`, onEscKeyDown);
-      });
-
-    taskEditComponent.getElement().querySelector(`.card__save`).addEventListener(`click`, () => {
-      this._taskList.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    });
-
-    render(this._taskList.getElement(), taskComponent.getElement(), Position.BEFOREEND);
-
+  _onChangeView() {
+    this._subscriptions.forEach((it) => it());
   }
 
   _onLoadButtonClick() {
